@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Bienestar y Détox Digital</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cosmic: {
+                            900: '#0B0F19',
+                            800: '#121824',
+                            700: '#1E293B',
+                            600: '#334155'
+                        },
+                        neon: {
+                            magenta: '#FF2E93',
+                            purple: '#8A2BE2',
+                            cyan: '#00F5FF',
+                            orange: '#FF6700',
+                            green: '#39FF14',
+                            gold: '#FFC93C'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .noise-bg {
+            background-image: radial-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 0);
+            background-size: 32px 32px;
+        }
+        @keyframes floatPlanet {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating-planet {
+            animation: floatPlanet 8s ease-in-out infinite;
+        }
+        @keyframes shootingStar {
+            0% { transform: translateX(0) translateY(0); opacity: 1; }
+            100% { transform: translateX(-500px) translateY(500px); opacity: 0; }
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: shootingStar linear infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0px rgba(255, 201, 60, 0.4); }
+            50% { box-shadow: 0 0 22px rgba(255, 201, 60, 0.55); }
+        }
+        .central-node {
+            animation: pulseGlow 3.5s ease-in-out infinite;
+        }
+        @media print {
+            body { background: white !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-cosmic-900 text-slate-100 min-h-screen font-sans relative overflow-x-hidden noise-bg">
+
+    <!-- Elementos Espaciales de Fondo Animados -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-10 left-10 w-24 h-24 rounded-full bg-neon-purple/20 blur-xl floating-planet"></div>
+        <div class="absolute bottom-20 right-16 w-36 h-36 rounded-full bg-neon-cyan/15 blur-2xl floating-planet" style="animation-delay: 3s;"></div>
+        <div class="star w-1 h-1 top-12 right-1/4" style="animation-duration: 6s;"></div>
+        <div class="star w-1.5 h-1.5 top-1/3 left-12" style="animation-duration: 9s;"></div>
+        <div class="star w-1 h-1 bottom-1/4 right-1/3" style="animation-duration: 7s;"></div>
+    </div>
+
+    <!-- Contenedor Principal App -->
+    <div id="app" class="relative z-10 max-w-4xl mx-auto px-4 py-8 flex flex-col min-h-screen justify-between">
+
+        <!-- Header / Barra de Progreso -->
+        <header class="mb-6 no-print">
+            <div class="flex justify-between items-center mb-3">
+                <span id="step-indicator" class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30">Fase 1</span>
+                <span id="score-display" class="text-sm font-semibold text-neon-green bg-neon-green/10 px-3 py-1 rounded-full border border-neon-green/30">Calificación: 10.0 pts</span>
+            </div>
+            <div class="w-full bg-cosmic-700 h-2 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-neon-cyan to-neon-magenta h-full transition-all duration-500" style="width: 12.5%;"></div>
+            </div>
+        </header>
+
+        <!-- Contenedor Dinámico de Fases -->
+        <main id="main-content" class="flex-grow flex flex-col justify-center">
+            <!-- El contenido se inyecta por JavaScript -->
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-xs text-slate-400 border-t border-cosmic-700 pt-4 no-print">
+            Laboratorio Interactivo Individual • Módulo de Hábitos y Détox Digital
+        </footer>
+    </div>
+
+    <!-- Script de Control del Laboratorio -->
+    <script>
+        // Estado Global del Alumno
+        const state = {
+            step: 1,
+            score: 10.0,
+            gradeNote: '',
+            startTime: null,
+            studentName: '',
+            group: '',
+            centralReflection: '',
+            selectedStrategies: [],
+            rankedStrategies: [],
+            strategyReflection: '',
+            selectedHabits: [],
+            rankedHabits: [],
+            habitReflection: ''
+        };
+
+        // Reloj oculto: penaliza tiempos de resolución sospechosamente cortos.
+        // No se muestra al alumno en ningún momento del proceso.
+        function computeGrade() {
+            const elapsedMinutes = (Date.now() - state.startTime) / 60000;
+            if (elapsedMinutes < 3) {
+                return { score: 6.0, note: 'Al parecer no realizaste correctamente el ejercicio: tu tiempo de resolución fue demasiado breve para haber leído y reflexionado el contenido con seriedad.' };
+            } else if (elapsedMinutes < 5) {
+                return { score: 7.0, note: 'Necesitas dedicar más tiempo de análisis. Tus respuestas sugieren que trabajaste con prisa; tómate el tiempo necesario para reflexionar a profundidad.' };
+            } else if (elapsedMinutes <= 8) {
+                return { score: 9.0, note: '' };
+            } else {
+                return { score: 10.0, note: '' };
+            }
+        }
+
+        const TOTAL_STEPS = 8;
+        const CENTRAL_THEME = 'Bienestar y Détox Digital';
+
+        // Banco de Elementos (Todos correctos, para jerarquizar)
+        const strategiesList = [
+            { id: 's1', title: 'Metas graduales y pasos pequeños', desc: 'Reducir paulatinamente los minutos en pantalla y realizar tareas cotidianas cortas sin el celular.' },
+            { id: 's2', title: 'Despertador analógico', desc: 'Evitar usar el teléfono como alarma para no comenzar el día revisando notificaciones.' },
+            { id: 's3', title: 'Límites de tiempo por App y franjas horarias', desc: 'Fijar bloques de 30-40 minutos al día para revisar perfiles en lugar de estar conectados constantemente.' },
+            { id: 's4', title: 'Dispositivos fuera de la vista', desc: 'Guardar el celular en cajones alejados o lugares de difícil acceso para evitar la tentación constante.' },
+            { id: 's5', title: 'Desactivación total de notificaciones', desc: 'Apagar alertas emergentes, sonidos y luces LED de redes para eliminar la sensación de urgencia.' },
+            { id: 's6', title: 'Reto compartido (Soporte social)', desc: 'Avisar a tus seres queridos cercanos para evitar malos entendidos y buscar apoyo mutuo.' },
+            { id: 's7', title: 'Apps de bloqueo temporal', desc: 'Apoyarse en herramientas digitales para medir y restringir el tiempo en pantalla.' },
+            { id: 's8', title: 'Zona libre de tecnología nocturna', desc: 'Establecer una hora fija en la noche donde ningún dispositivo entra a la recámara.' }
+        ];
+
+        const habitsList = [
+            { id: 'h1', title: 'Espacios libres de pantallas', desc: 'Prohibir el celular durante las comidas y reuniones para asegurar una conexión real con el entorno.' },
+            { id: 'h2', title: 'Tecnología con propósito', desc: 'Evitar el scroll infinito automático; usar los dispositivos con un objetivo claro y consciente.' },
+            { id: 'h3', title: 'Rutinas analógicas de sueño', desc: 'Desconectarse por completo de las pantallas antes de ir a dormir y al despertar.' },
+            { id: 'h4', title: 'Pasatiempos y ocio offline', desc: 'Reemplazar el entretenimiento digital por actividades físicas, lectura en papel o caminatas.' },
+            { id: 'h5', title: 'Depuración periódica de perfiles', desc: 'Dejar de seguir cuentas que no aporten valor y eliminar aplicaciones basura.' },
+            { id: 'h6', title: 'Separación de dispositivos', desc: 'Utilizar un equipo exclusivo para trabajo/escuela y otro personal para delimitar tiempos.' },
+            { id: 'h7', title: 'Higiene postural consciente', desc: 'Cuidar la postura corporal frente a las pantallas para no encorvar el cuello.' },
+            { id: 'h8', title: 'Pausas activas visuales', desc: 'Aplicar la regla 20-20-20 para descansar la vista periódicamente.' }
+        ];
+
+        function render() {
+            const main = document.getElementById('main-content');
+            const stepIndicator = document.getElementById('step-indicator');
+            const progressBar = document.getElementById('progress-bar');
+            const scoreDisplay = document.getElementById('score-display');
+
+            scoreDisplay.textContent = `Calificación: ${state.score.toFixed(1)} pts`;
+            progressBar.style.width = `${(state.step / TOTAL_STEPS) * 100}%`;
+            stepIndicator.textContent = `Fase ${state.step} de ${TOTAL_STEPS}`;
+
+            main.innerHTML = '';
+
+            switch(state.step) {
+                case 1: renderStep1(main); break;
+                case 2: renderStep2(main); break;
+                case 3: renderStep3(main); break;
+                case 4: renderStep4(main); break;
+                case 5: renderStep5(main); break;
+                case 6: renderStep6(main); break;
+                case 7: renderStep7(main); break;
+                case 8: renderStep8(main); break;
+            }
+        }
+
+        // FASE 1: Registro Individual
+        function renderStep1(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 md:p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">🌱</span>
+                        <h1 class="text-2xl md:text-3xl font-extrabold mt-2 text-white">Laboratorio de Détox Digital</h1>
+                        <p class="text-slate-300 text-sm mt-1">Evaluación de hábitos y estructuración de mapa mental</p>
+                    </div>
+
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6 text-amber-200 text-xs md:text-sm">
+                        <p class="font-bold mb-1">⚠️ Aviso Importante de Intento Único:</p>
+                        <p>Este laboratorio cuenta <strong>únicamente con un intento válido</strong>. La calificación y tu certificado final se basarán estrictamente en esta ejecución.</p>
+                    </div>
+
+                    <form onsubmit="handleStep1(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre Completo (Apellidos, Nombre - Orden Alfabético)</label>
+                            <input type="text" id="s-name" required placeholder="Ej. Pérez Gómez, Juan Carlos" value="${state.studentName}"
+                                class="w-full bg-cosmic-900 border border-cosmic-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-cyan">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Grupo al que perteneces</label>
+                            <input type="text" id="s-group" required placeholder="Ej. 401 o 5o A" value="${state.group}"
+                                class="w-full bg-cosmic-900 border border-cosmic-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-cyan">
+                        </div>
+                        <button type="submit" class="w-full mt-6 bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-3 px-6 rounded-xl shadow-lg hover:opacity-90 transition transform active:scale-95">
+                            Comenzar Laboratorio 🚀
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleStep1(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('s-name').value.trim();
+            const groupInput = document.getElementById('s-group').value.trim();
+            if(!nameInput || !groupInput) return;
+            state.studentName = nameInput;
+            state.group = groupInput;
+            state.step = 2;
+            render();
+        }
+
+        // FASE 2: Tema Central (Nodo raíz del mapa mental + autenticación)
+        function renderStep2(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-neon-gold/40 p-6 md:p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <div class="text-center mb-5">
+                        <span class="text-4xl">🎯</span>
+                        <h2 class="text-xl md:text-2xl font-bold text-white mt-2">Fase Central: Tu Porqué</h2>
+                        <p class="text-slate-300 text-xs md:text-sm mt-1 max-w-md mx-auto">Antes de elegir estrategias y hábitos, define el corazón de tu mapa mental: <strong>tu compromiso personal.</strong></p>
+                    </div>
+
+                    <div class="bg-cosmic-900/70 border-2 border-neon-gold/50 rounded-2xl p-4 mb-5 text-center">
+                        <span class="text-[10px] uppercase tracking-widest text-neon-gold font-bold">Nodo Central del Mapa Mental</span>
+                        <h3 class="text-lg md:text-xl font-black text-white mt-1">${CENTRAL_THEME}</h3>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Mi compromiso personal (escritura auténtica)</label>
+                        <p class="text-[11px] text-slate-400 mb-2">Con tus propias palabras: ¿qué significa para ti el bienestar digital y por qué te importa lograrlo? Evita copiar definiciones; queremos tu voz.</p>
+                        <textarea id="central-ref-input" rows="4" oninput="updateCentralRef(this)" placeholder="Escribe aquí tu reflexión personal y auténtica..."
+                            class="w-full bg-cosmic-900 border border-cosmic-600 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-neon-gold">${state.centralReflection}</textarea>
+                        <span id="central-char-counter" class="text-xs text-slate-400 font-mono">${state.centralReflection.length} / 100 caracteres mínimos</span>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="validateStep2()" class="bg-gradient-to-r from-neon-gold to-neon-orange text-cosmic-900 font-bold py-3 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Continuar a Estrategias ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCentralRef(el) {
+            const len = el.value.length;
+            const counter = document.getElementById('central-char-counter');
+            counter.textContent = `${len} / 100 caracteres mínimos`;
+            if(len >= 100) {
+                counter.classList.remove('text-slate-400');
+                counter.classList.add('text-neon-green');
+            } else {
+                counter.classList.add('text-slate-400');
+                counter.classList.remove('text-neon-green');
+            }
+        }
+
+        function validateStep2() {
+            const text = document.getElementById('central-ref-input').value.trim();
+            if(text.length < 100) {
+                alert('Tu compromiso personal debe tener al menos 100 caracteres. Este texto será el centro de tu mapa mental.');
+                return;
+            }
+            state.centralReflection = text;
+            state.step = 3;
+            render();
+        }
+
+        // FASE 3: Selección de Estrategias (Elegir 5 de 8)
+        function renderStep3(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 rounded-2xl shadow-2xl max-w-3xl mx-auto w-full">
+                    <h2 class="text-xl font-bold text-white mb-2">🌿 Rama 1: Estrategias de Détox Digital</h2>
+                    <p class="text-slate-300 text-xs md:text-sm mb-4">Selecciona exactamente <strong>5 opciones</strong> que consideres clave:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 max-h-[350px] overflow-y-auto pr-2">
+                        ${strategiesList.map(item => `
+                            <div onclick="toggleStrategy('${item.id}')" class="cursor-pointer border border-cosmic-600 rounded-xl p-3 bg-cosmic-900/50 hover:border-neon-cyan transition flex items-start space-x-3">
+                                <input type="checkbox" ${state.selectedStrategies.includes(item.id) ? 'checked' : ''} class="mt-1 accent-neon-cyan pointer-events-none">
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">${item.title}</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5">${item.desc}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-neon-cyan font-semibold">Seleccionadas: ${state.selectedStrategies.length} / 5</span>
+                        <button onclick="validateStep3()" class="bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-2.5 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Continuar a Jerarquización ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleStrategy(id) {
+            const index = state.selectedStrategies.indexOf(id);
+            if(index > -1) {
+                state.selectedStrategies.splice(index, 1);
+            } else {
+                if(state.selectedStrategies.length >= 5) {
+                    alert('Solo puedes seleccionar 5 estrategias principales.');
+                    return;
+                }
+                state.selectedStrategies.push(id);
+            }
+            render();
+        }
+
+        function validateStep3() {
+            if(state.selectedStrategies.length !== 5) {
+                alert('Debes seleccionar exactamente 5 estrategias para continuar.');
+                return;
+            }
+            // Inicializar rankedStrategies con el orden seleccionado
+            state.rankedStrategies = [...state.selectedStrategies];
+            state.step = 4;
+            render();
+        }
+
+        // FASE 4: Jerarquización de Estrategias
+        function renderStep4(container) {
+            const rankedObjects = state.rankedStrategies.map(id => strategiesList.find(s => s.id === id));
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <h2 class="text-xl font-bold text-white mb-2">📊 Jerarquiza tus Estrategias de Détox</h2>
+                    <p class="text-slate-300 text-xs md:text-sm mb-4">Usa los botones para ordenar del <strong>1 (más importante) al 5 (menos importante)</strong> según tu criterio:</p>
+
+                    <div class="space-y-2 mb-6">
+                        ${rankedObjects.map((item, idx) => `
+                            <div class="bg-cosmic-900 border border-cosmic-600 p-3 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-neon-cyan/20 text-neon-cyan font-bold w-6 h-6 rounded-full flex items-center justify-center text-xs">${idx + 1}</span>
+                                    <span class="text-sm font-semibold text-white">${item.title}</span>
+                                </div>
+                                <div class="flex space-x-1">
+                                    <button onclick="moveStrategy(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="bg-cosmic-700 hover:bg-cosmic-600 px-2 py-1 rounded text-xs">▲</button>
+                                    <button onclick="moveStrategy(${idx}, 1)" ${idx === rankedObjects.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="bg-cosmic-700 hover:bg-cosmic-600 px-2 py-1 rounded text-xs">▼</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="state.step = 5; render();" class="bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-2.5 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Ir a Reflexión de Estrategias ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function moveStrategy(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= state.rankedStrategies.length) return;
+            const temp = state.rankedStrategies[index];
+            state.rankedStrategies[index] = state.rankedStrategies[newIndex];
+            state.rankedStrategies[newIndex] = temp;
+            render();
+        }
+
+        // FASE 5: Reflexión Analítica de Estrategias
+        function renderStep5(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 md:p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <h2 class="text-xl font-bold text-white mb-2">🧠 Candado de Reflexión: Estrategias</h2>
+                    <p class="text-slate-300 text-xs md:text-sm mb-4">Argumenta por qué la estrategia que colocaste en el <strong>puesto #1</strong> es crucial para tu bienestar digital:</p>
+
+                    <div class="mb-4">
+                        <textarea id="strat-ref-input" rows="4" oninput="updateStratRef(this)" placeholder="Escribe aquí tu análisis detallado..."
+                            class="w-full bg-cosmic-900 border border-cosmic-600 rounded-xl p-4 text-white text-sm focus:outline-none focus:border-neon-cyan">${state.strategyReflection}</textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <span id="strat-char-counter" class="text-xs text-slate-400 font-mono">${state.strategyReflection.length} / 120 caracteres mínimos</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="validateStep5()" class="bg-gradient-to-r from-neon-magenta to-neon-orange text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Continuar a Hábitos Saludables ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateStratRef(el) {
+            const len = el.value.length;
+            const counter = document.getElementById('strat-char-counter');
+            counter.textContent = `${len} / 120 caracteres mínimos`;
+            if(len >= 120) {
+                counter.classList.remove('text-slate-400');
+                counter.classList.add('text-neon-green');
+            } else {
+                counter.classList.add('text-slate-400');
+                counter.classList.remove('text-neon-green');
+            }
+        }
+
+        function validateStep5() {
+            const text = document.getElementById('strat-ref-input').value.trim();
+            if(text.length < 120) {
+                alert('Tu reflexión debe tener al menos 120 caracteres para demostrar análisis crítico.');
+                return;
+            }
+            state.strategyReflection = text;
+            state.step = 6;
+            render();
+        }
+
+        // FASE 6: Selección de Hábitos (Elegir 5 de 8)
+        function renderStep6(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 rounded-2xl shadow-2xl max-w-3xl mx-auto w-full">
+                    <h2 class="text-xl font-bold text-white mb-2">⚡ Rama 2: Hábitos Digitales Saludables</h2>
+                    <p class="text-slate-300 text-xs md:text-sm mb-4">Selecciona exactamente <strong>5 hábitos a largo plazo</strong>:</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6 max-h-[350px] overflow-y-auto pr-2">
+                        ${habitsList.map(item => `
+                            <div onclick="toggleHabit('${item.id}')" class="cursor-pointer border border-cosmic-600 rounded-xl p-3 bg-cosmic-900/50 hover:border-neon-magenta transition flex items-start space-x-3">
+                                <input type="checkbox" ${state.selectedHabits.includes(item.id) ? 'checked' : ''} class="mt-1 accent-neon-magenta pointer-events-none">
+                                <div>
+                                    <h4 class="text-sm font-bold text-white">${item.title}</h4>
+                                    <p class="text-xs text-slate-400 mt-0.5">${item.desc}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-neon-magenta font-semibold">Seleccionados: ${state.selectedHabits.length} / 5</span>
+                        <button onclick="validateStep6()" class="bg-gradient-to-r from-neon-magenta to-neon-orange text-white font-bold py-2.5 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Jerarquizar Hábitos ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleHabit(id) {
+            const index = state.selectedHabits.indexOf(id);
+            if(index > -1) {
+                state.selectedHabits.splice(index, 1);
+            } else {
+                if(state.selectedHabits.length >= 5) {
+                    alert('Solo puedes seleccionar 5 hábitos principales.');
+                    return;
+                }
+                state.selectedHabits.push(id);
+            }
+            render();
+        }
+
+        function validateStep6() {
+            if(state.selectedHabits.length !== 5) {
+                alert('Debes seleccionar exactamente 5 hábitos para continuar.');
+                return;
+            }
+            state.rankedHabits = [...state.selectedHabits];
+            state.step = 7;
+            render();
+        }
+
+        // FASE 7: Jerarquización y Reflexión de Hábitos
+        function renderStep7(container) {
+            const rankedHabitObjs = state.rankedHabits.map(id => habitsList.find(h => h.id === id));
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <h2 class="text-xl font-bold text-white mb-2">📊 Jerarquiza y Reflexiona tus Hábitos</h2>
+                    <p class="text-slate-300 text-xs md:text-sm mb-4">Ordena del <strong>1 al 5</strong> tus hábitos y escribe tu reflexión final:</p>
+
+                    <div class="space-y-2 mb-4">
+                        ${rankedHabitObjs.map((item, idx) => `
+                            <div class="bg-cosmic-900 border border-cosmic-600 p-3 rounded-xl flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-neon-magenta/20 text-neon-magenta font-bold w-6 h-6 rounded-full flex items-center justify-center text-xs">${idx + 1}</span>
+                                    <span class="text-sm font-semibold text-white">${item.title}</span>
+                                </div>
+                                <div class="flex space-x-1">
+                                    <button onclick="moveHabit(${idx}, -1)" ${idx === 0 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="bg-cosmic-700 hover:bg-cosmic-600 px-2 py-1 rounded text-xs">▲</button>
+                                    <button onclick="moveHabit(${idx}, 1)" ${idx === rankedHabitObjs.length - 1 ? 'disabled class="opacity-30 cursor-not-allowed"' : ''} class="bg-cosmic-700 hover:bg-cosmic-600 px-2 py-1 rounded text-xs">▼</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="mb-4">
+                        <textarea id="habit-ref-input" rows="3" oninput="updateHabitRef(this)" placeholder="Reflexión sobre el hábito prioritario (#1)..."
+                            class="w-full bg-cosmic-900 border border-cosmic-600 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-neon-magenta">${state.habitReflection}</textarea>
+                        <span id="habit-char-counter" class="text-xs text-slate-400 font-mono">${state.habitReflection.length} / 120 caracteres mínimos</span>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button onclick="validateStep7()" class="bg-gradient-to-r from-neon-green to-neon-cyan text-cosmic-900 font-bold py-3 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Generar Certificado Mapa Mental 🏆
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function moveHabit(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= state.rankedHabits.length) return;
+            const temp = state.rankedHabits[index];
+            state.rankedHabits[index] = state.rankedHabits[newIndex];
+            state.rankedHabits[newIndex] = temp;
+            render();
+        }
+
+        function updateHabitRef(el) {
+            const len = el.value.length;
+            const counter = document.getElementById('habit-char-counter');
+            counter.textContent = `${len} / 120 caracteres mínimos`;
+            if(len >= 120) {
+                counter.classList.remove('text-slate-400');
+                counter.classList.add('text-neon-green');
+            } else {
+                counter.classList.add('text-slate-400');
+                counter.classList.remove('text-neon-green');
+            }
+        }
+
+        function validateStep7() {
+            const text = document.getElementById('habit-ref-input').value.trim();
+            if(text.length < 120) {
+                alert('Tu reflexión sobre los hábitos debe tener al menos 120 caracteres.');
+                return;
+            }
+            state.habitReflection = text;
+            const grade = computeGrade();
+            state.score = grade.score;
+            state.gradeNote = grade.note;
+            state.step = 8;
+            render();
+        }
+
+        // FASE 8: Certificado y Mapa Mental Estructurado (Nodo Central + 2 Ramas)
+        function renderStep8(container) {
+            const rankedStratObjs = state.rankedStrategies.map(id => strategiesList.find(s => s.id === id));
+            const rankedHabitObjs = state.rankedHabits.map(id => habitsList.find(h => h.id === id));
+
+            const isLowScore = state.score < 8;
+            const scoreColor = isLowScore ? 'text-amber-400' : 'text-neon-green';
+            const badgeClasses = isLowScore
+                ? 'bg-amber-500/10 border-amber-400 text-amber-300'
+                : 'bg-neon-green/10 border-neon-green text-neon-green';
+            const badgeText = isLowScore ? 'Requiere revisión' : 'Aprobado';
+
+            container.innerHTML = `
+                <div class="bg-cosmic-800/90 border-2 border-neon-cyan/50 p-6 rounded-3xl shadow-2xl max-w-4xl mx-auto w-full relative">
+                    <div class="absolute top-6 right-6 ${badgeClasses} border text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">
+                        ${badgeText}
+                    </div>
+
+                    <div class="text-center mb-4 border-b border-cosmic-700 pb-4">
+                        <span class="text-3xl">🗺️</span>
+                        <h2 class="text-2xl font-black text-white tracking-wide mt-1">MAPA MENTAL DIGITAL &amp; CERTIFICADO</h2>
+                        <p class="text-xs text-neon-cyan uppercase tracking-widest mt-0.5">Bienestar, Détox y Hábitos Digitales</p>
+                    </div>
+
+                    <!-- CALIFICACIÓN FINAL: número grande y centrado para identificación rápida -->
+                    <div class="flex flex-col items-center justify-center py-3 mb-4">
+                        <span class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-semibold mb-1">Calificación Final</span>
+                        <span class="${scoreColor} text-7xl md:text-8xl font-black leading-none drop-shadow-lg">${state.score.toFixed(1)}</span>
+                    </div>
+
+                    ${state.gradeNote ? `
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 mb-6 text-amber-200 text-xs md:text-sm text-center max-w-xl mx-auto">
+                        ${state.gradeNote}
+                    </div>` : ''}
+
+                    <!-- Datos del Alumno -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-cosmic-900/60 p-4 rounded-xl border border-cosmic-700 mb-6 text-sm">
+                        <div><strong class="text-slate-400">Alumno:</strong> <span class="text-white font-semibold">${state.studentName}</span></div>
+                        <div><strong class="text-slate-400">Grupo:</strong> <span class="text-white font-semibold">${state.group}</span></div>
+                    </div>
+
+                    <!-- NODO CENTRAL -->
+                    <div class="central-node bg-cosmic-900/80 border-2 border-neon-gold/60 rounded-2xl p-4 max-w-md mx-auto text-center relative z-10">
+                        <span class="text-2xl">🎯</span>
+                        <h3 class="text-sm md:text-base font-black text-white mt-1 tracking-wide">${CENTRAL_THEME}</h3>
+                        <p class="text-[11px] text-neon-gold/90 italic mt-2 leading-snug">&ldquo;${state.centralReflection}&rdquo;</p>
+                    </div>
+
+                    <!-- CONECTORES DEL MAPA MENTAL -->
+                    <svg viewBox="0 0 400 60" preserveAspectRatio="none" class="w-full h-10 md:h-14" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M200,0 L200,20 L100,20 L100,60" fill="none" stroke="#00F5FF" stroke-width="2.5" stroke-linecap="round"/>
+                        <path d="M200,0 L200,20 L300,20 L300,60" fill="none" stroke="#FF2E93" stroke-width="2.5" stroke-linecap="round"/>
+                        <circle cx="200" cy="0" r="5" fill="#FFC93C"/>
+                    </svg>
+
+                    <!-- Estructura Estilo Mapa Mental: 2 Ramas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- Rama 1: Estrategias Jerarquizadas -->
+                        <div class="bg-cosmic-900/80 p-4 rounded-2xl border border-neon-cyan/30">
+                            <h3 class="text-xs font-bold text-neon-cyan uppercase mb-2 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-neon-cyan mr-2"></span> 🌿 Estrategias de Détox (Jerarquizadas)
+                            </h3>
+                            <ol class="space-y-1 text-xs text-slate-300 list-decimal list-inside">
+                                ${rankedStratObjs.map(s => `<li><span class="text-white font-semibold">${s.title}</span></li>`).join('')}
+                            </ol>
+                            <div class="mt-3 pt-2 border-t border-cosmic-700 text-[11px] text-slate-400 italic">
+                                " ${state.strategyReflection} "
+                            </div>
+                        </div>
+
+                        <!-- Rama 2: Hábitos Jerarquizados -->
+                        <div class="bg-cosmic-900/80 p-4 rounded-2xl border border-neon-magenta/30">
+                            <h3 class="text-xs font-bold text-neon-magenta uppercase mb-2 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-neon-magenta mr-2"></span> ⚡ Hábitos Saludables (Jerarquizados)
+                            </h3>
+                            <ol class="space-y-1 text-xs text-slate-300 list-decimal list-inside">
+                                ${rankedHabitObjs.map(h => `<li><span class="text-white font-semibold">${h.title}</span></li>`).join('')}
+                            </ol>
+                            <div class="mt-3 pt-2 border-t border-cosmic-700 text-[11px] text-slate-400 italic">
+                                " ${state.habitReflection} "
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botón de impresión -->
+                    <div class="text-center bg-cosmic-700/40 p-4 rounded-xl border border-cosmic-600 no-print">
+                        <p class="text-xs text-slate-300 mb-2 font-medium">📸 Toma una captura de pantalla nítida de este certificado final o imprímelo a PDF para tu entrega.</p>
+                        <button onclick="window.print()" class="bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-2.5 px-6 rounded-xl text-xs uppercase tracking-wider shadow-lg hover:opacity-90 transition">
+                            Imprimir / Guardar Certificado 🖨️
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            state.startTime = Date.now();
+            render();
+        };
+    </script>
+</body>
+</html>
