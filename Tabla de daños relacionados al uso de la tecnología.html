@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Tabla de Daños Tecnológicos</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cosmic: {
+                            900: '#0B0F19',
+                            800: '#121824',
+                            700: '#1E293B',
+                            600: '#334155'
+                        },
+                        neon: {
+                            magenta: '#FF2E93',
+                            purple: '#8A2BE2',
+                            cyan: '#00F5FF',
+                            orange: '#FF6700',
+                            green: '#39FF14',
+                            gold: '#FFC93C',
+                            red: '#FF3333'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .noise-bg {
+            background-image: radial-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 0);
+            background-size: 32px 32px;
+        }
+        @keyframes floatPlanet {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(3deg);
+            }
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+        }
+        .floating-planet {
+            animation: floatPlanet 8s ease-in-out infinite;
+        }
+
+        @keyframes shootingStar {
+            0% {
+                transform: translateX(0) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(-500px) translateY(500px);
+                opacity: 0;
+            }
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: shootingStar linear infinite;
+        }
+
+        .neon-input {
+            width: 100%;
+            background: rgba(11, 15, 25, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px 14px;
+            color: #f8fafc;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .neon-input:focus {
+            border-color: #00F5FF;
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+            background: rgba(0, 245, 255, 0.05);
+        }
+        .neon-input[readonly] {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border-color: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+        }
+
+        .toast-error {
+            background: rgba(255, 51, 51, 0.15);
+            border-left: 4px solid #FF3333;
+            color: #ffb3b3;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .item-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px dashed rgba(0, 245, 255, 0.4);
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .item-card:hover {
+            background: rgba(0, 245, 255, 0.1);
+            border-color: #00F5FF;
+            transform: translateY(-2px);
+        }
+        .item-card:active {
+            cursor: grabbing;
+        }
+        .item-card.selected {
+            border-color: #39FF14;
+            background: rgba(57, 255, 20, 0.15);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+        }
+
+        .drop-slot {
+            background: rgba(11, 15, 25, 0.8);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .drop-slot.drag-over {
+            border-color: #39FF14;
+            background: rgba(57, 255, 20, 0.05);
+        }
+        .drop-slot.filled {
+            border-style: solid;
+            border-color: rgba(0, 245, 255, 0.4);
+            background: rgba(0, 245, 255, 0.08);
+        }
+
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .slot-content {
+            width: 100%;
+            text-align: left;
+        }
+
+        .score-large {
+            font-size: 5rem;
+            line-height: 1;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .noise-bg {
+                background-image: none !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-card {
+                border: 1px solid #ccc !important;
+                box-shadow: none !important;
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+            }
+            .print-table th {
+                background-color: #f1f5f9 !important;
+                color: #1e293b !important;
+            }
+            .print-table td {
+                border-bottom: 1px solid #e2e8f0 !important;
+                color: #334155 !important;
+            }
+            .text-white {
+                color: black !important;
+            }
+            .text-slate-300,
+            .text-slate-400 {
+                color: #475569 !important;
+            }
+            .score-large {
+                font-size: 3rem !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-cosmic-900 text-slate-100 min-h-screen relative overflow-x-hidden noise-bg">
+
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0 no-print">
+        <div class="absolute top-10 left-10 w-24 h-24 rounded-full bg-neon-purple/20 blur-xl floating-planet"></div>
+        <div class="absolute bottom-20 right-16 w-36 h-36 rounded-full bg-neon-cyan/15 blur-2xl floating-planet" style="animation-delay: 3s;"></div>
+        <div class="star w-1 h-1 top-12 right-1/4" style="animation-duration: 6s;"></div>
+        <div class="star w-1.5 h-1.5 top-1/3 left-12" style="animation-duration: 9s;"></div>
+    </div>
+
+    <div id="app" class="relative z-10 max-w-5xl mx-auto px-4 py-8 flex flex-col min-h-screen justify-between">
+
+        <header class="mb-6 no-print">
+            <div class="flex justify-between items-center mb-3">
+                <span id="step-indicator" class="text-xs uppercase tracking-wider font-bold px-3 py-1 rounded-full bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/30">Fase 1</span>
+                <span class="text-sm font-semibold text-neon-gold bg-neon-gold/10 px-3 py-1 rounded-full border border-neon-gold/30 font-mono">M1_ACTIVIDAD 6 (V2)</span>
+            </div>
+            <div class="w-full bg-cosmic-700 h-2 rounded-full overflow-hidden">
+                <div id="progress-bar" class="bg-gradient-to-r from-neon-cyan to-neon-purple h-full transition-all duration-500" style="width: 20%;"></div>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex-grow flex flex-col justify-center">
+        </main>
+
+        <footer class="mt-8 text-center text-xs text-slate-500 border-t border-cosmic-700 pt-4 no-print">
+            Trabajo Individual • Daños relacionados al uso excesivo de la tecnología
+        </footer>
+    </div>
+
+    <script>
+        const BANK_ITEMS = [{
+            id: 'b_f1',
+            dim: 'fisica',
+            tipo: 'Síndrome del túnel carpiano y tendinitis',
+            desc: 'Afección del nervio de la muñeca que provoca dolor, hormigueo, entumecimiento y debilidad en dedos y manos. Es ocasionada por mantener la mano en una postura forzada y antinatural al escribir en dispositivos por periodos prolongados.'
+        }, {
+            id: 'b_f2',
+            dim: 'fisica',
+            tipo: 'Alteración de los ritmos circadianos',
+            desc: 'Empeoramiento severo en la conciliación y calidad del sueño debido a la exposición a la luz azul de las pantallas antes de dormir. Esto altera el descanso reparador básico para el organismo.'
+        }, {
+            id: 'b_f3',
+            dim: 'fisica',
+            tipo: 'Sobrepeso, obesidad y sedentarismo',
+            desc: 'Aumento del peso corporal y disminución de la actividad física debido a hábitos de ocio estáticos frente a dispositivos electrónicos que sustituyen el movimiento corporal.'
+        }, {
+            id: 'b_p1',
+            dim: 'psicologica',
+            tipo: 'Internet Addiction Disorder (IAD)',
+            desc: 'Trastorno conductual caracterizado por un uso compulsivo, abusivo y fuera de control de internet a través de dispositivos electrónicos, interfiriendo gravemente con la vida cotidiana.'
+        }, {
+            id: 'b_p2',
+            dim: 'psicologica',
+            tipo: 'Depresión, soledad y fatiga cognitiva',
+            desc: 'Deterioro del estado de ánimo, sentimientos de aislamiento y saturación o agotamiento de la energía mental derivados de la sobrecarga de estímulos e información digital.'
+        }, {
+            id: 'b_p3',
+            dim: 'psicologica',
+            tipo: 'Factor de comparación y desesperación',
+            desc: 'Proceso cognitivo de frustración y baja autoestima que surge cuando el usuario evalúa su propia vida real comparándola de forma destructiva con las imágenes editadas e idealizadas que otros proyectan en sus redes sociales.'
+        }, {
+            id: 'b_p4',
+            dim: 'psicologica',
+            tipo: 'Disminución de los niveles de atención',
+            desc: 'Dificultad para mantener la concentración sostenida y pérdida de la capacidad de enfoque en tareas diarias debido a la sobreestimulación constante y fragmentada de las pantallas.'
+        }, {
+            id: 'b_s1',
+            dim: 'social',
+            tipo: 'Pérdida de interacción social en persona',
+            desc: 'Debilitamiento de las relaciones en el mundo físico y de la socialización real al sustituir de forma casi exclusiva la comunicación directa cara a cara por interacciones virtuales.'
+        }, {
+            id: 'b_s2',
+            dim: 'social',
+            tipo: 'Exposición al ciberacoso (cyberbullying)',
+            desc: 'Mayor vulnerabilidad de los jóvenes en entornos digitales donde la falta de filtros y supervisión los expone a dinámicas de hostigamiento, acoso o violencia por parte de terceros en sus redes.'
+        }, {
+            id: 'b_s3',
+            dim: 'social',
+            tipo: 'Pérdida de placer en actividades analógicas',
+            desc: 'Desinterés generalizado por el entorno físico y desmotivación o pérdida del disfrute en pasatiempos, ejercicio físico o actividades al aire libre que no involucren una pantalla de por medio.'
+        }];
+
+        const state = {
+            step: 1,
+            studentName: '',
+            group: '',
+            startTime: null,
+            endTime: null,
+            damages: {
+                fisica: [
+                    { id: 'f1', tipo: 'Síndrome de text-neck', desc: 'Desalineamiento de una o varias vértebras de la columna provocado por mantener la cabeza inclinada hacia abajo de forma prolongada al mirar el celular. Se manifiesta con dolor cervical severo, dolores de cabeza (cefaleas) e irritabilidad muscular.', isPrefilledTipo: true, isPrefilledDesc: true, slotType: 'text', assignedId: null },
+                    { id: 'f2', tipo: 'Tensión ocular y fatiga visual', desc: 'Cansancio de la vista, resequedad, tensión ocular e incluso daños en la retina provocados por pasar horas ininterrumpidas expuesto directamente a pantallas emisoras de luz.', isPrefilledTipo: true, isPrefilledDesc: true, slotType: 'text', assignedId: null },
+                    { id: 'f3', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 'f4', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 'f5', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null }
+                ],
+                psicologica: [
+                    { id: 'p1', tipo: 'Nomofobia', desc: 'Fobia o pánico irracional a no tener el teléfono celular disponible o a perderlo de vista. Se manifiesta con crisis de ansiedad, palpitaciones, angustia extrema y sensación de ahogo ante la idea de estar incomunicado.', isPrefilledTipo: true, isPrefilledDesc: true, slotType: 'text', assignedId: null },
+                    { id: 'p2', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 'p3', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 'p4', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 'p5', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null }
+                ],
+                social: [
+                    { id: 's1', tipo: 'Síndrome de FOMO (Fear Of Missing Out)', desc: 'Ansiedad y temor patológico a quedar excluido de las interacciones sociales en línea, planes o novedades del círculo de contactos al no estar conectado a internet.', isPrefilledTipo: true, isPrefilledDesc: true, slotType: 'text', assignedId: null },
+                    { id: 's2', tipo: 'Aislamiento social y reclusión doméstica', desc: 'Tendencia progresiva a encerrarse en casa, limitar las salidas al exterior y mudar casi todas las actividades (como compras o entretenimiento) al plano digital, reduciendo drásticamente las interacciones presenciales.', isPrefilledTipo: true, isPrefilledDesc: true, slotType: 'text', assignedId: null },
+                    { id: 's3', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 's4', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null },
+                    { id: 's5', tipo: '', desc: '', isPrefilledTipo: false, isPrefilledDesc: false, slotType: 'drag', assignedId: null }
+                ]
+            },
+            selectedItemId: null,
+            reflection: '',
+            rawScore: 0,
+            finalScore: 0,
+            maxScore: BANK_ITEMS.length,
+            results: {},
+            timeElapsed: 0
+        };
+
+        const TOTAL_STEPS = 5;
+
+        function render() {
+            const main = document.getElementById('main-content');
+            const stepIndicator = document.getElementById('step-indicator');
+            const progressBar = document.getElementById('progress-bar');
+
+            progressBar.style.width = `${(state.step / TOTAL_STEPS) * 100}%`;
+            stepIndicator.textContent = `Fase ${state.step} de ${TOTAL_STEPS}`;
+            main.innerHTML = '';
+
+            switch (state.step) {
+                case 1:
+                    renderStep1(main);
+                    break;
+                case 2:
+                    renderStep2(main);
+                    break;
+                case 3:
+                    renderStep3(main);
+                    break;
+                case 4:
+                    renderStep4(main);
+                    break;
+                case 5:
+                    renderStep5(main);
+                    break;
+            }
+        }
+
+        function showError(containerId, message) {
+            const errorDiv = document.getElementById(containerId);
+            if (errorDiv) {
+                errorDiv.innerHTML = `<strong>[ERROR]</strong> ${message}`;
+                errorDiv.style.display = 'block';
+                setTimeout(() => { errorDiv.style.display = 'none'; }, 4000);
+            }
+        }
+
+        function renderStep1(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 md:p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 rounded-full bg-neon-cyan/20 flex items-center justify-center mx-auto mb-4 border border-neon-cyan/30 text-2xl">📱</div>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-white">Tabla de daños relacionados al uso de la tecnología</h1>
+                        <p class="text-slate-300 text-sm mt-1">Clasificación de impactos por sobreexposición digital</p>
+                    </div>
+
+                    <div class="bg-neon-orange/10 border border-neon-orange/30 rounded-xl p-4 mb-6 text-neon-orange text-xs">
+                        <p class="font-bold mb-1">⚠️ Importante:</p>
+                        <p>Solo cuentas con <strong>un intento</strong> para completar esta actividad. Este será el registro que se tomará como calificación final. Asegúrate de leer cuidadosamente cada instrucción antes de proceder.</p>
+                    </div>
+
+                    <form onsubmit="handleStep1(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre del Estudiante (Apellidos, Nombre)</label>
+                            <input type="text" id="s-name" required placeholder="Ej. Pérez Gómez, Ana" value="${state.studentName}" class="neon-input text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Grupo / Semestre</label>
+                            <input type="text" id="s-group" required placeholder="Ej. 401" value="${state.group}" class="neon-input text-sm">
+                        </div>
+                        
+                        <div id="error-step1" class="toast-error"></div>
+
+                        <button type="submit" class="w-full mt-6 bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-3.5 px-6 rounded-xl shadow-lg hover:opacity-90 transition transform active:scale-95 text-sm uppercase tracking-wider">
+                            Iniciar Laboratorio
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleStep1(e) {
+            e.preventDefault();
+            const names = document.getElementById('s-name').value.trim();
+            const group = document.getElementById('s-group').value.trim();
+
+            if (!names || !group) {
+                showError('error-step1', 'Debes completar ambos campos para continuar.');
+                return;
+            }
+            state.studentName = names;
+            state.group = group;
+            state.startTime = Date.now();
+            state.step = 2;
+            render();
+        }
+
+        function renderStep2(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 md:p-8 rounded-2xl shadow-2xl max-w-3xl mx-auto w-full">
+                    <h2 class="text-xl md:text-2xl font-bold text-white mb-4 border-b border-cosmic-600 pb-3">Instrucciones de la Actividad</h2>
+                    
+                    <div class="space-y-4 text-sm text-slate-300">
+                        <p>Completa la matriz clasificatoria de daños tecnológicos. Selecciona cada daño del banco y colócalo en la dimensión correcta.</p>
+                        
+                        <div class="bg-cosmic-900 p-4 rounded-xl border border-cosmic-600">
+                            <h3 class="font-bold text-neon-cyan mb-2">Sistema de Puntuación:</h3>
+                            <ul class="list-disc pl-5 space-y-2">
+                                <li><strong>10 puntos totales</strong> (1 punto por cada daño bien ubicado).</li>
+                                <li>El tiempo de respuesta también será considerado en la calificación final.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-neon-magenta/10 border-l-4 border-neon-magenta p-4 rounded-r-xl">
+                            <strong class="text-neon-magenta block mb-1">⏱️ Tiempo:</strong>
+                            <p class="text-xs">El cronómetro comienza ahora. Si completas el ejercicio en menos de <strong>4 minutos</strong>, tu calificación se ajustará automáticamente.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end mt-8">
+                        <button onclick="state.step = 3; render();" class="bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-3 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Entendido, ir a Matriz ➔
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStep3(container) {
+            const assignedIds = Object.values(state.damages).flatMap(dim => dim.map(item => item.assignedId)).filter(Boolean);
+            const availableItems = BANK_ITEMS.filter(item => !assignedIds.includes(item.id));
+
+            const generateDimensionBlock = (dimensionKey, title, colorClass, icon, totalRows) => {
+                let html = `
+                <div class="mb-8 bg-cosmic-900/50 p-4 md:p-6 rounded-xl border border-cosmic-600">
+                    <h3 class="text-lg font-bold ${colorClass} mb-4 flex items-center gap-2">
+                        <span>${icon}</span> Dimensión ${title}
+                    </h3>
+                    <div class="space-y-4">
+                `;
+
+                for (let i = 0; i < totalRows; i++) {
+                    const rowItem = state.damages[dimensionKey][i];
+
+                    if (rowItem.slotType === 'text') {
+                        let valTipo = rowItem.tipo;
+                        let valDesc = rowItem.desc;
+                        let readOnlyTipo = rowItem.isPrefilledTipo ? 'readonly' : '';
+                        let readOnlyDesc = rowItem.isPrefilledDesc ? 'readonly' : '';
+
+                        html += `
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-cosmic-800 p-3 rounded-lg border border-cosmic-700">
+                                <div class="md:col-span-1">
+                                    <label class="block text-[10px] text-slate-400 uppercase tracking-wide mb-1">Daño ${i+1}: Concepto</label>
+                                    <input type="text" id="${dimensionKey}-tipo-${i}" value="${valTipo}" ${readOnlyTipo} placeholder="¿De qué daño se trata?" class="neon-input text-xs" oninput="saveData('${dimensionKey}', ${i}, 'tipo', this.value)">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] text-slate-400 uppercase tracking-wide mb-1">Descripción / Manifestación</label>
+                                    <textarea id="${dimensionKey}-desc-${i}" rows="2" ${readOnlyDesc} placeholder="Explica brevemente en qué consiste..." class="neon-input text-xs resize-none" oninput="saveData('${dimensionKey}', ${i}, 'desc', this.value)">${valDesc}</textarea>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        const assignedItem = BANK_ITEMS.find(b => b.id === rowItem.assignedId);
+                        
+                        html += `
+                            <div class="bg-cosmic-800 p-3 rounded-lg border border-dashed ${assignedItem ? 'border-neon-cyan/60' : 'border-neon-cyan/40'}">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-[10px] text-neon-cyan uppercase font-bold">Casilla Interactiva [Daño ${i+1}]</span>
+                                    ${assignedItem ? `<button type="button" onclick="unassignItem('${dimensionKey}', ${i})" class="text-[10px] text-red-400 hover:text-red-300 underline">Quitar</button>` : ''}
+                                </div>
+                                
+                                <div class="drop-slot ${assignedItem ? 'filled' : ''}" 
+                                     ondrop="dropItem(event, '${dimensionKey}', ${i})"
+                                     ondragover="allowDrop(event)"
+                                     ondragleave="removeDragOver(event)"
+                                     onclick="handleSlotClick('${dimensionKey}', ${i})">
+                                    ${assignedItem ? `
+                                        <div class="slot-content">
+                                            <strong class="text-xs text-white block">${assignedItem.tipo}</strong>
+                                            <p class="text-[11px] text-slate-300 mt-1">${assignedItem.desc}</p>
+                                        </div>
+                                    ` : `
+                                        <span class="text-xs text-slate-400 italic">Arrastra aquí un daño del banco o haz clic habiéndolo seleccionado...</span>
+                                    `}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                html += `</div></div>`;
+                return html;
+            };
+
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-4 md:p-8 rounded-2xl shadow-2xl max-w-4xl mx-auto w-full">
+                    <div class="mb-6 flex justify-between items-center border-b border-cosmic-600 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white">Matriz Interactiva de Daños</h2>
+                            <p class="text-xs text-slate-400 mt-1">Selecciona un daño del banco y colócalo en la casilla correcta.</p>
+                        </div>
+                    </div>
+
+                    <!-- INSTRUCCIONES DE USO -->
+                    <div class="mb-6 bg-cosmic-900/70 p-4 rounded-xl border border-neon-cyan/20">
+                        <h4 class="text-xs font-bold text-neon-cyan uppercase tracking-wider mb-2">📋 ¿Cómo interactuar con el banco de opciones?</h4>
+                        <ul class="text-xs text-slate-300 space-y-1.5 list-disc pl-4">
+                            <li><strong>Selección por clic:</strong> Haz clic sobre un daño en el banco (se resaltará en verde). Luego haz clic en la casilla vacía donde deseas colocarlo.</li>
+                            <li><strong>Arrastrar y soltar:</strong> Arrastra el daño desde el banco y suéltalo directamente en la casilla destino.</li>
+                            <li>Si cometiste un error, usa el botón <strong>"Quitar"</strong> para retirar el daño de la casilla y volver a intentarlo.</li>
+                            <li>⚠️ <strong>Recomendación:</strong> Para una mejor experiencia, utiliza una <strong>computadora</strong> en lugar de un dispositivo móvil, ya que la interfaz está optimizada para pantallas más amplias.</li>
+                        </ul>
+                    </div>
+
+                    <!-- BANCO DE ELEMENTOS -->
+                    <div class="mb-8 bg-cosmic-900 p-4 md:p-6 rounded-2xl border-2 border-neon-cyan/30">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-neon-cyan uppercase tracking-wider flex items-center gap-2">
+                                <span>📦</span> Banco de Daños Disponibles (${availableItems.length} por colocar)
+                            </h3>
+                            <span class="text-[10px] text-slate-400">💡 Arrastra o selecciona y haz clic en la casilla destino</span>
+                        </div>
+
+                        ${availableItems.length === 0 ? `
+                            <div class="text-center py-4 bg-neon-green/10 border border-neon-green/30 rounded-xl text-neon-green text-xs font-bold">
+                                ✓ ¡Todos los daños han sido ubicados en la matriz!
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                ${availableItems.map(item => `
+                                    <div draggable="true" 
+                                         ondragstart="dragItem(event, '${item.id}')"
+                                         onclick="selectItem('${item.id}')"
+                                         class="item-card ${state.selectedItemId === item.id ? 'selected' : ''}">
+                                        <div class="border-b border-cosmic-600/60 pb-1.5 mb-1.5">
+                                            <h4 class="text-xs font-bold text-white">${item.tipo}</h4>
+                                        </div>
+                                        <p class="text-[11px] text-slate-300 mt-0.5 line-clamp-2">${item.desc}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+
+                    <form onsubmit="validateStep3(event)">
+                        ${generateDimensionBlock('fisica', 'Física', 'text-neon-orange', '🦴', 5)}
+                        ${generateDimensionBlock('psicologica', 'Psicológica / Mental', 'text-neon-purple', '🧠', 5)}
+                        ${generateDimensionBlock('social', 'Social', 'text-neon-cyan', '👥', 5)}
+                        
+                        <div id="error-step3" class="toast-error"></div>
+
+                        <div class="flex justify-between items-center mt-6">
+                            <button type="button" onclick="state.step = 2; render();" class="text-slate-400 hover:text-white text-sm font-semibold transition">
+                                ← Volver
+                            </button>
+                            <button type="submit" class="bg-gradient-to-r from-neon-green to-neon-cyan text-cosmic-900 font-bold py-3 px-8 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                                Guardar Matriz ➔
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function saveData(dim, index, field, value) {
+            state.damages[dim][index][field] = value;
+        }
+
+        function dragItem(ev, itemId) {
+            ev.dataTransfer.setData("text/plain", itemId);
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function removeDragOver(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function dropItem(ev, dimKey, index) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+            const itemId = ev.dataTransfer.getData("text/plain");
+            assignItemToSlot(itemId, dimKey, index);
+        }
+
+        function selectItem(itemId) {
+            state.selectedItemId = (state.selectedItemId === itemId) ? null : itemId;
+            render();
+        }
+
+        function handleSlotClick(dimKey, index) {
+            if (state.selectedItemId) {
+                assignItemToSlot(state.selectedItemId, dimKey, index);
+                state.selectedItemId = null;
+                render();
+            } else {
+                showError('error-step3', 'Primero selecciona un daño del banco haciendo clic en él.');
+            }
+        }
+
+        function assignItemToSlot(itemId, dimKey, index) {
+            const item = BANK_ITEMS.find(b => b.id === itemId);
+            if (!item) return;
+
+            let alreadyAssigned = false;
+            Object.values(state.damages).forEach(dim => {
+                dim.forEach(row => {
+                    if (row.assignedId === itemId) alreadyAssigned = true;
+                });
+            });
+
+            if (alreadyAssigned) {
+                showError('error-step3', 'Este daño ya ha sido colocado en la matriz.');
+                return;
+            }
+
+            state.damages[dimKey][index].assignedId = item.id;
+            state.damages[dimKey][index].tipo = item.tipo;
+            state.damages[dimKey][index].desc = item.desc;
+            render();
+        }
+
+        function unassignItem(dimKey, index) {
+            state.damages[dimKey][index].assignedId = null;
+            state.damages[dimKey][index].tipo = '';
+            state.damages[dimKey][index].desc = '';
+            render();
+        }
+
+        function validateStep3(e) {
+            e.preventDefault();
+            
+            let allComplete = true;
+            let totalSlots = 0;
+            let filledSlots = 0;
+            
+            ['fisica', 'psicologica', 'social'].forEach(dim => {
+                state.damages[dim].forEach(item => {
+                    if (item.slotType === 'drag') {
+                        totalSlots++;
+                        if (item.assignedId) filledSlots++;
+                    }
+                });
+            });
+
+            if (filledSlots < totalSlots) {
+                showError('error-step3', `Faltan ${totalSlots - filledSlots} casillas interactivas por completar.`);
+                return;
+            }
+
+            // Registrar tiempo de finalización
+            state.endTime = Date.now();
+            state.timeElapsed = (state.endTime - state.startTime) / 60000; // en minutos
+
+            evaluateAnswers();
+            
+            state.step = 4;
+            render();
+        }
+
+        function evaluateAnswers() {
+            state.rawScore = 0;
+            state.results = {};
+            
+            ['fisica', 'psicologica', 'social'].forEach(dim => {
+                state.damages[dim].forEach(item => {
+                    if (item.slotType === 'drag' && item.assignedId) {
+                        const bankItem = BANK_ITEMS.find(b => b.id === item.assignedId);
+                        if (bankItem) {
+                            const isCorrect = bankItem.dim === dim;
+                            state.results[item.id] = {
+                                assignedId: item.assignedId,
+                                tipo: item.tipo,
+                                desc: item.desc,
+                                correctDim: bankItem.dim,
+                                assignedDim: dim,
+                                isCorrect: isCorrect
+                            };
+                            if (isCorrect) {
+                                state.rawScore++;
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Calcular calificación final
+            state.finalScore = state.rawScore;
+            
+            // Si el tiempo fue menor a 4 minutos, asignar 6
+            if (state.timeElapsed < 4) {
+                state.finalScore = 6;
+            }
+        }
+
+        function renderStep4(container) {
+            container.innerHTML = `
+                <div class="bg-cosmic-800/80 backdrop-blur-md border border-cosmic-600 p-6 md:p-8 rounded-2xl shadow-2xl max-w-2xl mx-auto w-full">
+                    <h2 class="text-xl font-bold text-white mb-2">🛡️ Reflexión Final</h2>
+                    <p class="text-slate-300 text-xs md:text-sm mb-6">Redacta una breve conclusión general (mín. 100 caracteres) analizando cómo el equilibrio tecnológico impacta tu desarrollo integral y qué hábito cambiarías de tu rutina.</p>
+                    
+                    <div class="mb-4">
+                        <textarea id="reflection-input" rows="5" oninput="updateReflection(this)" placeholder="Redacta tu síntesis final aquí..."
+                            class="neon-input text-sm p-4">${state.reflection}</textarea>
+                        <div class="flex justify-end mt-2">
+                            <span id="char-counter" class="text-xs text-slate-400 font-mono">${state.reflection.length} / 100 caracteres mínimos</span>
+                        </div>
+                    </div>
+                    
+                    <div id="error-step4" class="toast-error"></div>
+
+                    <div class="flex justify-between items-center mt-6">
+                        <button onclick="state.step = 3; render();" class="text-slate-400 hover:text-white text-sm font-semibold transition">
+                            ← Volver a la Matriz
+                        </button>
+                        <button onclick="validateStep4()" class="bg-gradient-to-r from-neon-magenta to-neon-orange text-white font-bold py-3 px-6 rounded-xl text-sm shadow-lg hover:opacity-90 transition">
+                            Generar Certificado 📄
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateReflection(el) {
+            state.reflection = el.value;
+            const counter = document.getElementById('char-counter');
+            if (counter) {
+                counter.textContent = `${el.value.length} / 100 caracteres mínimos`;
+            }
+        }
+
+        function validateStep4() {
+            const reflection = document.getElementById('reflection-input');
+            if (!reflection || reflection.value.trim().length < 100) {
+                showError('error-step4', 'La reflexión debe tener al menos 100 caracteres.');
+                return;
+            }
+            state.reflection = reflection.value.trim();
+            state.step = 5;
+            render();
+        }
+
+        function renderStep5(container) {
+            const correctItems = [];
+            const incorrectItems = [];
+            
+            Object.keys(state.results).forEach(key => {
+                const result = state.results[key];
+                if (result.isCorrect) {
+                    correctItems.push(result);
+                } else {
+                    incorrectItems.push(result);
+                }
+            });
+
+            const isTimePenalty = state.timeElapsed < 4;
+            const timeDisplay = state.timeElapsed < 1 ? 
+                `${Math.round(state.timeElapsed * 60)} segundos` : 
+                `${state.timeElapsed.toFixed(1)} minutos`;
+
+            const renderTableRows = (dimKey, dimTitle, colorClass, totalRows) => {
+                let rows = '';
+                for (let i = 0; i < totalRows; i++) {
+                    const item = state.damages[dimKey][i];
+                    const tipo = item.tipo || '(No especificado)';
+                    const desc = item.desc || '(No especificado)';
+                    
+                    let statusBadge = '';
+                    if (item.slotType === 'drag' && item.assignedId) {
+                        const result = state.results[item.id];
+                        if (result) {
+                            statusBadge = result.isCorrect ? 
+                                `<span class="text-neon-green text-xs ml-2">✓ Correcto</span>` : 
+                                `<span class="text-neon-red text-xs ml-2">✗ Incorrecto (debía ir en ${result.correctDim})</span>`;
+                        }
+                    }
+
+                    rows += `
+                        <tr class="border-b border-cosmic-700 last:border-0 hover:bg-cosmic-800/50 transition">
+                            ${i === 0 ? `<td class="p-3 text-sm font-bold ${colorClass} align-middle" rowspan="${totalRows}">${dimTitle}</td>` : ''}
+                            <td class="p-3 text-sm text-slate-200 border-l border-cosmic-700">${tipo} ${statusBadge}</td>
+                            <td class="p-3 text-sm text-slate-300 border-l border-cosmic-700">${desc}</td>
+                        </tr>
+                    `;
+                }
+                return rows;
+            };
+
+            container.innerHTML = `
+                <div class="print-card bg-cosmic-800/90 border border-slate-600 p-8 rounded-3xl shadow-2xl max-w-5xl mx-auto w-full relative">
+                    
+                    <div class="border-b-2 border-slate-700 pb-5 mb-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-2xl font-black text-white tracking-wide">CERTIFICADO DE EVALUACIÓN</h2>
+                                <p class="text-xs text-neon-cyan uppercase tracking-widest mt-1">Tabla de daños relacionados al uso de la tecnología</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="bg-neon-green/10 text-neon-green border border-neon-green/30 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Completado</span>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 bg-cosmic-900/60 p-4 rounded-xl border border-cosmic-700">
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Nombre del Estudiante:</p>
+                                <p class="text-sm text-slate-200 font-mono">${state.studentName}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Grupo:</p>
+                                <p class="text-lg font-bold text-white">${state.group}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Tiempo empleado:</p>
+                                <p class="text-sm font-mono text-slate-300">${timeDisplay}</p>
+                            </div>
+                            <div class="md:text-right">
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Calificación:</p>
+                                <p class="score-large font-black text-neon-gold">${state.finalScore}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla Principal -->
+                    <div class="overflow-x-auto mb-8 bg-cosmic-900 rounded-xl border border-cosmic-600">
+                        <table class="w-full text-left border-collapse print-table">
+                            <thead>
+                                <tr class="bg-cosmic-950 border-b-2 border-cosmic-500">
+                                    <th class="p-3 text-xs uppercase tracking-wider text-slate-300 w-1/4">Dimensión del Daño</th>
+                                    <th class="p-3 text-xs uppercase tracking-wider text-slate-300 w-1/4 border-l border-cosmic-700">Tipo de Daño</th>
+                                    <th class="p-3 text-xs uppercase tracking-wider text-slate-300 w-1/2 border-l border-cosmic-700">Descripción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${renderTableRows('fisica', 'Física', 'text-neon-orange', 5)}
+                                ${renderTableRows('psicologica', 'Psicológica / Mental', 'text-neon-purple', 5)}
+                                ${renderTableRows('social', 'Social', 'text-neon-cyan', 5)}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Resumen detallado de evaluación -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div class="bg-neon-green/10 p-4 rounded-xl border border-neon-green/30">
+                            <h4 class="text-xs font-bold text-neon-green uppercase tracking-wider mb-2">✓ Aciertos (${correctItems.length})</h4>
+                            ${correctItems.length === 0 ? 
+                                '<p class="text-xs text-slate-400">No hay aciertos registrados.</p>' :
+                                correctItems.map(item => 
+                                    `<p class="text-xs text-slate-300 border-b border-cosmic-700 py-1">${item.tipo}</p>`
+                                ).join('')
+                            }
+                        </div>
+                        <div class="bg-neon-red/10 p-4 rounded-xl border border-neon-red/30">
+                            <h4 class="text-xs font-bold text-neon-red uppercase tracking-wider mb-2">✗ Errores (${incorrectItems.length})</h4>
+                            ${incorrectItems.length === 0 ? 
+                                '<p class="text-xs text-slate-400">¡Felicidades! No hay errores.</p>' :
+                                incorrectItems.map(item => 
+                                    `<p class="text-xs text-slate-300 border-b border-cosmic-700 py-1">
+                                        <span class="text-neon-red">${item.tipo}</span> 
+                                        <span class="text-slate-500">→ debía ir en: ${item.correctDim}</span>
+                                    </p>`
+                                ).join('')
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Nota por tiempo -->
+                    ${isTimePenalty ? `
+                        <div class="bg-neon-orange/20 p-4 rounded-xl border border-neon-orange/40 mb-8">
+                            <h4 class="text-xs font-bold text-neon-orange uppercase tracking-wider mb-1">⏱️ Nota por tiempo de respuesta</h4>
+                            <p class="text-sm text-slate-300">
+                                Completaste el ejercicio en <strong>${timeDisplay}</strong> (menos de 4 minutos). 
+                                Tu análisis fue muy breve, por lo que tu calificación se ha ajustado a <strong>6</strong>.
+                            </p>
+                        </div>
+                    ` : `
+                        <div class="bg-neon-green/10 p-4 rounded-xl border border-neon-green/30 mb-8">
+                            <h4 class="text-xs font-bold text-neon-green uppercase tracking-wider mb-1">⏱️ Tiempo de respuesta</h4>
+                            <p class="text-sm text-slate-300">
+                                Completaste el ejercicio en <strong>${timeDisplay}</strong>. 
+                                Tu tiempo de análisis fue adecuado.
+                            </p>
+                        </div>
+                    `}
+
+                    <!-- Reflexión -->
+                    <div class="bg-slate-800/50 p-5 rounded-xl border border-slate-700 mb-8">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-neon-magenta"></span> Reflexión Final
+                        </h3>
+                        <p class="text-sm text-slate-200 italic leading-relaxed">"${state.reflection}"</p>
+                    </div>
+
+                    <!-- Recomendación -->
+                    <div class="bg-neon-cyan/5 p-4 rounded-xl border border-neon-cyan/20 mb-8">
+                        <h4 class="text-xs font-bold text-neon-cyan uppercase tracking-wider mb-2">📌 Recomendación de Bienestar Digital</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Los expertos recomiendan evitar medidas de abstinencia total o desconexiones radicales. La vía más efectiva radica en la educación sobre el uso responsable, la higiene postural, la desconexión horaria programada y la sustitución activa de pantallas por actividades recreativas físicas o al aire libre que fomenten el bienestar integral.
+                        </p>
+                    </div>
+
+                    <div class="text-center no-print bg-cosmic-900 p-4 rounded-xl border border-neon-cyan/20">
+                        <p class="text-xs text-slate-400 mb-3 font-medium">Exporta este certificado como PDF o imprímelo para entregarlo.</p>
+                        <button onclick="window.print()" class="bg-gradient-to-r from-neon-cyan to-neon-purple text-cosmic-900 font-bold py-3 px-8 rounded-xl text-sm uppercase tracking-wider shadow-[0_0_15px_rgba(0,245,255,0.4)] hover:opacity-90 transition transform hover:scale-105">
+                            🖨️ Exportar a PDF / Imprimir
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            render();
+        };
+    </script>
+</body>
+</html>
