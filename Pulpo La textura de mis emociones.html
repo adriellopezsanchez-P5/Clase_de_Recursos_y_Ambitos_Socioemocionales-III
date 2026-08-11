@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulpo: La textura de mis emociones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a2a4a;
+            --bg-deep: #1a5a7a;
+            --bg-ocean: #2a8aaa;
+            --panel-bg: rgba(10, 42, 74, 0.75);
+            --text-main: #f9fafb;
+            --text-muted: #7ec8e3;
+            --border-glass: rgba(126, 200, 227, 0.3);
+            
+            --coral-pink: #FF6B6B;
+            --coral-orange: #FF9F43;
+            --coral-yellow: #FECA57;
+            --coral-teal: #00D2D3;
+            --coral-blue: #54A0FF;
+            --coral-purple: #A29BFE;
+            --coral-green: #55EFC4;
+            --coral-lavender: #D980FA;
+            
+            --caribbean-blue: #4DC9F6;
+            --caribbean-light: #89E0FF;
+            --caribbean-sand: #FFF8E7;
+            
+            --font-ui: 'Inter', sans-serif;
+            --font-data: 'Space Mono', monospace;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: linear-gradient(135deg, #0a2a4a 0%, #1a5a7a 40%, #2a8aaa 70%, #4DC9F6 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .fondo-marino {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -3;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(255, 107, 107, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 159, 67, 0.10) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 100%, rgba(77, 201, 246, 0.15) 0%, transparent 60%),
+                linear-gradient(180deg, #0a2a4a 0%, #1a5a7a 30%, #2a8aaa 60%, #4DC9F6 100%);
+        }
+
+        .siluetas-marinas {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -2;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.15;
+        }
+
+        .silueta {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 60px;
+            animation: flotarSilueta linear infinite;
+        }
+
+        @keyframes flotarSilueta {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -20px) rotate(5deg); }
+            50% { transform: translate(-10px, -40px) rotate(-3deg); }
+            75% { transform: translate(20px, -15px) rotate(4deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        .contenedor-burbujas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .burbuja {
+            position: absolute;
+            bottom: -120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.08));
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            box-shadow: inset -4px -4px 12px rgba(255, 255, 255, 0.4), 
+                        inset 4px 4px 12px rgba(0, 0, 0, 0.15),
+                        0 0 40px rgba(77, 201, 246, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: subirBurbuja linear infinite;
+        }
+
+        .burbuja::after {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 22%;
+            width: 30%;
+            height: 25%;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 50%;
+            transform: rotate(-25deg);
+        }
+
+        .burbuja::before {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            right: 20%;
+            width: 12%;
+            height: 10%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 50%;
+        }
+
+        @keyframes subirBurbuja {
+            0% { 
+                transform: translateY(0) scale(0.6) rotate(0deg); 
+                opacity: 0.2;
+            }
+            15% { 
+                opacity: 0.8;
+                transform: translateY(-10vh) scale(0.8) rotate(6deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-50vh) scale(1.1) rotate(-4deg);
+            }
+            85% {
+                opacity: 0.8;
+                transform: translateY(-90vh) scale(0.9) rotate(5deg);
+            }
+            100% { 
+                transform: translateY(-120vh) scale(0.5) rotate(-10deg); 
+                opacity: 0.05;
+            }
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .tentaculo-estres {
+            width: 100%;
+            background: rgba(255, 107, 107, 0.08);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ffffff;
+            font-family: var(--font-data);
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: none;
+            box-shadow: inset 0 0 20px rgba(255, 107, 107, 0.05);
+        }
+
+        .tentaculo-estres:focus {
+            background: rgba(255, 107, 107, 0.15);
+            border-color: var(--coral-pink);
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.15), inset 0 0 20px rgba(255, 107, 107, 0.1);
+        }
+        
+        .tentaculo-estres::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        .cabeza-bienestar {
+            width: 100%;
+            background: rgba(77, 201, 246, 0.10);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(85, 239, 196, 0.4);
+            color: #ffffff;
+            font-family: var(--font-ui);
+            border-radius: 20px;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(77, 201, 246, 0.05);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .cabeza-bienestar:focus {
+            background: rgba(77, 201, 246, 0.18);
+            border-color: var(--coral-green);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(77, 201, 246, 0.1);
+        }
+
+        .cabeza-bienestar::placeholder { color: rgba(255, 255, 255, 0.4); text-shadow: none; font-style: italic; }
+
+        .sys-title {
+            font-family: var(--font-data);
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 159, 67, 0.2));
+            color: #fff;
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            font-family: var(--font-data);
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            backdrop-filter: blur(8px);
+            font-weight: 700;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, var(--coral-pink), var(--coral-orange));
+            color: #fff;
+            box-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .action-btn-success {
+            background: linear-gradient(135deg, #55EFC4, #4DC9F6);
+            color: #0a2a4a;
+            border: 2px solid #55EFC4;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 16px 32px;
+            box-shadow: 0 0 30px rgba(85, 239, 196, 0.3);
+        }
+
+        .action-btn-success:hover {
+            background: linear-gradient(135deg, #4DC9F6, #55EFC4);
+            box-shadow: 0 0 50px rgba(85, 239, 196, 0.5);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .fade-in { animation: fadeIn 0.6s ease forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulso {
+            animation: pulso 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulso {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .spin {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: var(--coral-pink); border-radius: 4px; }
+
+        .pulpo-svg {
+            position: relative;
+            z-index: 5;
+        }
+
+        .caja-estresor {
+            background: rgba(10, 42, 74, 0.75);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            padding: 10px 12px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-family: var(--font-data);
+            font-size: 13px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+            line-height: 1.4;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .caja-estresor.pendiente {
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 400;
+            font-style: italic;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .caja-cabeza {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid rgba(85, 239, 196, 0.6);
+            border-radius: 16px;
+            padding: 14px 18px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .caja-cabeza .label {
+            font-family: var(--font-data);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #0a2a4a;
+            font-weight: 800;
+            border-bottom: 2px solid #55EFC4;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .caja-cabeza .texto {
+            font-family: var(--font-ui);
+            font-size: 16px;
+            font-weight: 600;
+            color: #0a2a4a;
+            line-height: 1.5;
+        }
+
+        .caja-cabeza .texto.pendiente {
+            opacity: 0.5;
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .calificacion-grande {
+            font-size: 6rem;
+            line-height: 1;
+            font-weight: 900;
+            text-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+        }
+
+        .badge-calificacion {
+            display: inline-block;
+            background: rgba(254, 202, 87, 0.2);
+            border: 3px solid #FECA57;
+            border-radius: 20px;
+            padding: 8px 24px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #FECA57;
+            margin-top: 10px;
+        }
+
+        @media print {
+            body { 
+                background: #0a2a4a !important;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+            .no-print { display: none !important; }
+            .fondo-marino, .contenedor-burbujas, .siluetas-marinas { display: none !important; }
+            .glass-panel { border: 1px solid rgba(126, 200, 227, 0.3) !important; background: rgba(10, 42, 74, 0.9) !important; }
+            svg { max-width: 100% !important; height: auto !important; }
+            .caja-estresor { background: rgba(10, 42, 74, 0.9) !important; color: white !important; }
+            .caja-cabeza { background: rgba(255,255,255,0.9) !important; }
+            .caja-cabeza .texto { color: #0a2a4a !important; }
+            .calificacion-grande { font-size: 3rem !important; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Fondos -->
+    <div class="fondo-marino"></div>
+
+    <div class="siluetas-marinas">
+        <div class="silueta" style="top: 15%; left: 8%; font-size: 80px; animation-duration: 25s;">🐠</div>
+        <div class="silueta" style="top: 45%; left: 3%; font-size: 60px; animation-duration: 20s; animation-delay: 2s;">🐟</div>
+        <div class="silueta" style="top: 70%; left: 12%; font-size: 90px; animation-duration: 30s; animation-delay: 1s;">🐡</div>
+        <div class="silueta" style="top: 20%; right: 10%; font-size: 70px; animation-duration: 22s; animation-delay: 3s;">🐠</div>
+        <div class="silueta" style="top: 55%; right: 5%; font-size: 85px; animation-duration: 28s; animation-delay: 0.5s;">🐙</div>
+        <div class="silueta" style="top: 80%; right: 15%; font-size: 65px; animation-duration: 24s; animation-delay: 4s;">🐟</div>
+        <div class="silueta" style="top: 35%; left: 50%; font-size: 50px; animation-duration: 18s; animation-delay: 2.5s;">🦈</div>
+        <div class="silueta" style="top: 60%; left: 45%; font-size: 45px; animation-duration: 20s; animation-delay: 1.5s;">🐋</div>
+    </div>
+
+    <div class="contenedor-burbujas">
+        <div class="burbuja" style="left: 5%; width: 32px; height: 32px; animation-duration: 14s; animation-delay: 0s;"></div>
+        <div class="burbuja" style="left: 15%; width: 20px; height: 20px; animation-duration: 18s; animation-delay: 2.5s;"></div>
+        <div class="burbuja" style="left: 28%; width: 40px; height: 40px; animation-duration: 16s; animation-delay: 1.2s;"></div>
+        <div class="burbuja" style="left: 40%; width: 24px; height: 24px; animation-duration: 12s; animation-delay: 4s;"></div>
+        <div class="burbuja" style="left: 52%; width: 45px; height: 45px; animation-duration: 20s; animation-delay: 0.8s;"></div>
+        <div class="burbuja" style="left: 65%; width: 18px; height: 18px; animation-duration: 15s; animation-delay: 3.5s;"></div>
+        <div class="burbuja" style="left: 75%; width: 35px; height: 35px; animation-duration: 17s; animation-delay: 1.8s;"></div>
+        <div class="burbuja" style="left: 88%; width: 22px; height: 22px; animation-duration: 11s; animation-delay: 2.8s;"></div>
+        <div class="burbuja" style="left: 45%; width: 55px; height: 55px; animation-duration: 22s; animation-delay: 0.3s;"></div>
+        <div class="burbuja" style="left: 10%; width: 14px; height: 14px; animation-duration: 10s; animation-delay: 5.5s;"></div>
+        <div class="burbuja" style="left: 70%; width: 28px; height: 28px; animation-duration: 19s; animation-delay: 2s;"></div>
+        <div class="burbuja" style="left: 33%; width: 16px; height: 16px; animation-duration: 13s; animation-delay: 3.8s;"></div>
+        <div class="burbuja" style="left: 50%; width: 38px; height: 38px; animation-duration: 21s; animation-delay: 1s;"></div>
+        <div class="burbuja" style="left: 78%; width: 26px; height: 26px; animation-duration: 16s; animation-delay: 4.5s;"></div>
+    </div>
+
+    <!-- PAGINA 1: REGISTRO -->
+    <div id="page1" class="max-w-4xl mx-auto relative z-20 py-12 fade-in">
+        <div class="glass-panel p-8 md:p-12">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-[#FF6B6B] via-[#FECA57] to-[#4DC9F6] bg-clip-text text-transparent mb-3">🐙 Pulpo: La textura de mis emociones</h1>
+                <p class="text-[var(--caribbean-light)] font-data text-sm">Sistema de Análisis de Estrés y Bienestar Emocional</p>
+            </div>
+
+            <div class="bg-[#FF6B6B]/10 border-2 border-[#FF6B6B]/30 rounded-xl p-5 mb-8">
+                <h3 class="font-bold text-[#FF6B6B] text-sm uppercase tracking-wider mb-2">⚠️ Instrucciones importantes</h3>
+                <ul class="text-sm text-slate-300 space-y-2 list-disc pl-5">
+                    <li><strong>Un solo intento:</strong> Esta actividad solo se puede realizar una vez. La calificación obtenida en este primer intento será la definitiva.</li>
+                    <li><strong>Recomendación:</strong> Para una mejor experiencia, utiliza una <strong>computadora</strong> en lugar de un dispositivo móvil.</li>
+                    <li><strong>Captura de pantalla:</strong> Al finalizar, deberás hacer <strong>captura de pantalla</strong> del certificado final para entregarlo.</li>
+                    <li><strong>Reflexión:</strong> Tómate el tiempo necesario para una reflexión profunda y sincera sobre tus estresores y estrategias de bienestar.</li>
+                    <li><strong>Seriedad:</strong> Se requiere un lenguaje respetuoso y apropiado para un ejercicio académico.</li>
+                </ul>
+            </div>
+
+            <form onsubmit="handleRegistro(event)" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre completo del estudiante</label>
+                    <input type="text" id="nombreCompleto" required placeholder="Ej. Pérez Gómez, Ana María" 
+                           class="w-full px-4 py-3 bg-white/5 border-2 border-[#4DC9F6] text-white rounded-xl focus:outline-none focus:bg-white/10 font-data transition-all focus:border-[#FECA57]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Grupo / Semestre</label>
+                    <input type="text" id="grupo" required placeholder="Ej. 401" 
+                           class="w-full px-4 py-3 bg-white/5 border-2 border-[#4DC9F6] text-white rounded-xl focus:outline-none focus:bg-white/10 font-data transition-all focus:border-[#FECA57]">
+                </div>
+                
+                <div id="error-registro" class="text-[#FF6B6B] font-data text-sm text-center hidden font-bold animate-pulse p-3 bg-[#FF6B6B]/10 rounded-xl">[!] COMPLETA TODOS LOS CAMPOS PARA CONTINUAR</div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF9F43] text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg hover:opacity-90 transition transform active:scale-95 uppercase tracking-wider">
+                    🐙 Iniciar Ejercicio
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAGINA 2: EJERCICIO (Formulario de estresores) -->
+    <div id="page2" class="hidden max-w-6xl mx-auto space-y-8 relative z-20 py-6">
+        
+        <div class="glass-panel p-4 md:p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white">🐙 Mapeo de Estresores</h2>
+                    <p class="text-xs text-[var(--caribbean-light)] font-data" id="nombreDisplay">Estudiante: ---</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="glass-panel p-6 md:p-10 fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="space-y-4">
+                    <div class="sys-title text-xs text-center border-b border-[var(--border-glass)] pb-2 mb-4" style="color: var(--coral-pink);">🐙 TENTÁCULOS IZQUIERDOS</div>
+                    <textarea id="t1" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 1..." style="border-color: rgba(255,107,107,0.3);"></textarea>
+                    <textarea id="t2" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 2..." style="border-color: rgba(255,159,67,0.3);"></textarea>
+                    <textarea id="t3" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 3..." style="border-color: rgba(254,202,87,0.3);"></textarea>
+                    <textarea id="t4" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 4..." style="border-color: rgba(162,155,254,0.3);"></textarea>
+                </div>
+
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <div class="sys-title text-xs text-center border-b border-[var(--border-glass)] pb-2 mb-4 w-full" style="color: var(--coral-green);">🧠 NÚCLEO_BIENESTAR</div>
+                    
+                    <div class="w-full relative">
+                        <textarea id="headAction" class="cabeza-bienestar h-64 p-5 text-base text-center" 
+                                  placeholder="¿Qué acciones cognitivas o físicas realizas para recuperar la calma y el control emocional?"
+                                  style="border-color: rgba(77,201,246,0.3);"></textarea>
+                    </div>
+
+                    <div class="text-center pt-6 w-full">
+                        <button onclick="generateDiagram()" class="action-btn w-full py-4 text-lg font-bold tracking-widest bg-black/30">
+                            🎨 Generar Diagrama Vectorial
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="sys-title text-xs text-center border-b border-[var(--border-glass)] pb-2 mb-4" style="color: var(--coral-pink);">🐙 TENTÁCULOS DERECHOS</div>
+                    <textarea id="t5" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 5..." style="border-color: rgba(77,201,246,0.3);"></textarea>
+                    <textarea id="t6" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 6..." style="border-color: rgba(84,160,255,0.3);"></textarea>
+                    <textarea id="t7" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 7..." style="border-color: rgba(217,128,250,0.3);"></textarea>
+                    <textarea id="t8" class="tentaculo-estres h-20 p-3 text-sm" placeholder="Estresor 8..." style="border-color: rgba(85,239,196,0.3);"></textarea>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <!-- PAGINA 3: RESULTADO DEL PULPO -->
+    <div id="page3" class="hidden max-w-6xl mx-auto space-y-6 relative z-20 pb-20 pt-6">
+        
+        <div class="no-print mb-6 flex flex-wrap gap-4 items-center justify-between">
+            <button onclick="backToEdit()" class="text-[var(--text-muted)] hover:text-white font-data text-sm flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl backdrop-blur-sm border border-[var(--border-glass)] w-fit">
+                ← Volver a Editar
+            </button>
+            <button onclick="enviarRevision()" class="action-btn action-btn-success px-10 py-4 text-base flex items-center gap-3 shadow-2xl animate-pulse">
+                📤 Enviar a Revisión
+            </button>
+        </div>
+
+        <div class="glass-panel p-6 md:p-8 bg-transparent backdrop-blur-none border-0 shadow-none">
+            
+            <div class="text-center border-b border-[var(--border-glass)] pb-6 mb-6">
+                <h2 class="text-3xl font-bold text-[var(--coral-pink)] uppercase tracking-wide" id="reportNameDisplay">USUARIO</h2>
+                <p class="text-xs text-[var(--caribbean-light)] font-data mt-1">🐙 MAPA ANATÓMICO DEL ESTRÉS Y CONTROL EMOCIONAL</p>
+                <div id="calificacionContainer" class="hidden mt-3">
+                    <span class="badge-calificacion">🏆 Calificación: <span id="calificacionBadge">10</span></span>
+                    <p class="text-sm text-[var(--caribbean-light)] mt-3" id="mensajeRetroalimentacion"></p>
+                    <p class="text-xs text-slate-400 mt-1">✅ Ejercicio completado y evaluado</p>
+                </div>
+            </div>
+
+            <div class="w-full overflow-hidden flex justify-center items-center bg-transparent rounded-3xl p-4 pulpo-svg" style="min-height: 850px;">
+                
+                <svg viewBox="0 0 1200 1000" class="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                    
+                    <defs>
+                        <radialGradient id="headGrad" cx="50%" cy="35%" r="65%">
+                            <stop offset="0%" stop-color="#FF6B6B" stop-opacity="0.95" />
+                            <stop offset="25%" stop-color="#FF9F43" stop-opacity="0.90" />
+                            <stop offset="50%" stop-color="#FECA57" stop-opacity="0.85" />
+                            <stop offset="75%" stop-color="#55EFC4" stop-opacity="0.80" />
+                            <stop offset="100%" stop-color="#4DC9F6" stop-opacity="0.75" />
+                        </radialGradient>
+
+                        <radialGradient id="headSolid" cx="50%" cy="40%" r="60%">
+                            <stop offset="0%" stop-color="#FF6B6B" stop-opacity="1" />
+                            <stop offset="30%" stop-color="#FF9F43" stop-opacity="1" />
+                            <stop offset="60%" stop-color="#FECA57" stop-opacity="1" />
+                            <stop offset="100%" stop-color="#55EFC4" stop-opacity="0.95" />
+                        </radialGradient>
+
+                        <linearGradient id="tentacle1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FF6B6B" />
+                            <stop offset="100%" stop-color="#FF9F43" />
+                        </linearGradient>
+                        <linearGradient id="tentacle2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FF9F43" />
+                            <stop offset="100%" stop-color="#FECA57" />
+                        </linearGradient>
+                        <linearGradient id="tentacle3" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FECA57" />
+                            <stop offset="100%" stop-color="#A29BFE" />
+                        </linearGradient>
+                        <linearGradient id="tentacle4" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#A29BFE" />
+                            <stop offset="100%" stop-color="#D980FA" />
+                        </linearGradient>
+                        <linearGradient id="tentacle5" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#4DC9F6" />
+                            <stop offset="100%" stop-color="#54A0FF" />
+                        </linearGradient>
+                        <linearGradient id="tentacle6" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#54A0FF" />
+                            <stop offset="100%" stop-color="#A29BFE" />
+                        </linearGradient>
+                        <linearGradient id="tentacle7" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#D980FA" />
+                            <stop offset="100%" stop-color="#FF6B6B" />
+                        </linearGradient>
+                        <linearGradient id="tentacle8" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#55EFC4" />
+                            <stop offset="100%" stop-color="#4DC9F6" />
+                        </linearGradient>
+
+                        <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+                            <feGaussianBlur stdDeviation="4" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+
+                        <filter id="eyeGlow">
+                            <feGaussianBlur stdDeviation="2" />
+                        </filter>
+                    </defs>
+
+                    <path d="M 530,340 C 400,200 230,160 180,110" fill="none" stroke="url(#tentacle1)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 510,430 C 350,410 220,350 180,320" fill="none" stroke="url(#tentacle2)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 520,510 C 350,580 220,640 180,630" fill="none" stroke="url(#tentacle3)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 550,580 C 430,740 320,840 280,890" fill="none" stroke="url(#tentacle4)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 670,340 C 800,200 970,160 1020,110" fill="none" stroke="url(#tentacle5)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 690,430 C 850,410 980,350 1020,320" fill="none" stroke="url(#tentacle6)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 680,510 C 850,580 980,640 1020,630" fill="none" stroke="url(#tentacle7)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+                    <path d="M 650,580 C 770,740 880,840 920,890" fill="none" stroke="url(#tentacle8)" stroke-width="24" stroke-linecap="round" filter="url(#softShadow)"/>
+
+                    <circle cx="380" cy="230" r="8" fill="#FF9F43" opacity="0.7"/>
+                    <circle cx="310" cy="190" r="7" fill="#FF9F43" opacity="0.6"/>
+                    <circle cx="240" cy="155" r="6" fill="#FF9F43" opacity="0.5"/>
+                    <circle cx="380" cy="570" r="8" fill="#A29BFE" opacity="0.7"/>
+                    <circle cx="300" cy="600" r="7" fill="#A29BFE" opacity="0.6"/>
+                    <circle cx="820" cy="230" r="8" fill="#4DC9F6" opacity="0.7"/>
+                    <circle cx="890" cy="190" r="7" fill="#4DC9F6" opacity="0.6"/>
+                    <circle cx="960" cy="155" r="6" fill="#4DC9F6" opacity="0.5"/>
+                    <circle cx="820" cy="570" r="8" fill="#D980FA" opacity="0.7"/>
+                    <circle cx="900" cy="600" r="7" fill="#D980FA" opacity="0.6"/>
+
+                    <path d="M 600,70 C 790,70 860,310 730,520 C 670,630 530,630 470,520 C 340,310 410,70 600,70 Z" 
+                          fill="url(#headSolid)" stroke="#FF6B6B" stroke-width="5" filter="url(#softShadow)"/>
+                    <path d="M 600,70 C 790,70 860,310 730,520 C 670,630 530,630 470,520 C 340,310 410,70 600,70 Z" 
+                          fill="url(#headGrad)" stroke="none" opacity="0.4"/>
+                    
+                    <ellipse cx="520" cy="270" rx="48" ry="52" fill="white" stroke="#FF6B6B" stroke-width="4"/>
+                    <ellipse cx="530" cy="275" rx="28" ry="30" fill="#1a0a3a"/>
+                    <ellipse cx="540" cy="265" rx="14" ry="14" fill="white" filter="url(#eyeGlow)"/>
+                    <circle cx="515" cy="285" r="5" fill="white" opacity="0.6"/>
+                    
+                    <ellipse cx="680" cy="270" rx="48" ry="52" fill="white" stroke="#FF6B6B" stroke-width="4"/>
+                    <ellipse cx="670" cy="275" rx="28" ry="30" fill="#1a0a3a"/>
+                    <ellipse cx="660" cy="265" rx="14" ry="14" fill="white" filter="url(#eyeGlow)"/>
+                    <circle cx="685" cy="285" r="5" fill="white" opacity="0.6"/>
+
+                    <path d="M 540,370 Q 600,420 660,370" fill="none" stroke="#1a0a3a" stroke-width="5" stroke-linecap="round"/>
+                    <rect x="560" y="375" width="8" height="7" rx="2" fill="white" stroke="#1a0a3a" stroke-width="1.5"/>
+                    <rect x="575" y="378" width="8" height="7" rx="2" fill="white" stroke="#1a0a3a" stroke-width="1.5"/>
+                    <rect x="590" y="380" width="8" height="7" rx="2" fill="white" stroke="#1a0a3a" stroke-width="1.5"/>
+                    <rect x="605" y="378" width="8" height="7" rx="2" fill="white" stroke="#1a0a3a" stroke-width="1.5"/>
+                    <rect x="620" y="375" width="8" height="7" rx="2" fill="white" stroke="#1a0a3a" stroke-width="1.5"/>
+
+                    <path d="M 470,210 Q 520,185 570,215" fill="none" stroke="#1a0a3a" stroke-width="5" stroke-linecap="round"/>
+                    <path d="M 730,210 Q 680,185 630,215" fill="none" stroke="#1a0a3a" stroke-width="5" stroke-linecap="round"/>
+
+                    <foreignObject x="40" y="25" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT1-container">
+                            <p id="svgT1">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="40" y="265" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT2-container">
+                            <p id="svgT2">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="40" y="570" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT3-container">
+                            <p id="svgT3">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="160" y="840" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT4-container">
+                            <p id="svgT4">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="960" y="25" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT5-container">
+                            <p id="svgT5">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="960" y="265" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT6-container">
+                            <p id="svgT6">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="960" y="570" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT7-container">
+                            <p id="svgT7">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+                    <foreignObject x="840" y="840" width="200" height="120">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-estresor" id="svgT8-container">
+                            <p id="svgT8">[ SIN ESTRESOR ]</p>
+                        </div>
+                    </foreignObject>
+
+                    <foreignObject x="420" y="470" width="360" height="180">
+                        <div xmlns="http://www.w3.org/1999/xhtml" class="caja-cabeza" id="svgHead-container">
+                            <span class="label">🧠 Núcleo de Bienestar y Calma</span>
+                            <p id="svgHeadText" class="texto pendiente">Estrategia de bienestar pendiente...</p>
+                        </div>
+                    </foreignObject>
+
+                </svg>
+            </div>
+            
+            <!-- Mensaje de captura de pantalla -->
+            <div id="mensajeCaptura" class="hidden text-center bg-[#FECA57]/10 border-2 border-[#FECA57]/40 rounded-xl p-4 mt-6">
+                <p class="text-sm text-[#FECA57] font-bold">📸 ¡Ejercicio completado!</p>
+                <p class="text-sm text-slate-300 mt-1">Realiza una <strong>captura de pantalla</strong> de esta pantalla con tu calificación visible para entregar tu evidencia.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGINA 4: EVALUACIÓN (Pantalla de carga) -->
+    <div id="page4" class="hidden max-w-2xl mx-auto relative z-20 py-20">
+        <div class="glass-panel p-12 text-center">
+            <div class="text-8xl mb-6 pulso">🐙</div>
+            <h2 class="text-3xl font-bold text-white mb-4">Evaluando tu ejercicio...</h2>
+            <p class="text-[var(--caribbean-light)] mb-6">Por favor espera unos segundos mientras analizamos tus respuestas.</p>
+            <div class="flex justify-center gap-3 mb-8">
+                <div class="w-4 h-4 rounded-full bg-[#FF6B6B] animate-bounce" style="animation-delay: 0s;"></div>
+                <div class="w-4 h-4 rounded-full bg-[#FECA57] animate-bounce" style="animation-delay: 0.2s;"></div>
+                <div class="w-4 h-4 rounded-full bg-[#4DC9F6] animate-bounce" style="animation-delay: 0.4s;"></div>
+                <div class="w-4 h-4 rounded-full bg-[#55EFC4] animate-bounce" style="animation-delay: 0.6s;"></div>
+            </div>
+            <div class="text-sm text-slate-400 font-data">
+                <span class="spin inline-block mr-2">🔄</span> Procesando...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIABLES GLOBALES ====================
+        let tiempoInicio = null;
+        let tiempoFinal = null;
+        let cronometroInterval = null;
+        let nombreEstudiante = '';
+        let grupoEstudiante = '';
+        let calificacionFinal = 0;
+        let tiempoSegundos = 0;
+        let ejercicioFinalizado = false;
+        let mensajeRetroalimentacion = '';
+
+        // ==================== PAGINA 1: REGISTRO ====================
+        function handleRegistro(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombreCompleto').value.trim();
+            const grupo = document.getElementById('grupo').value.trim();
+            const error = document.getElementById('error-registro');
+
+            if (!nombre || !grupo) {
+                error.classList.remove('hidden');
+                return;
+            }
+            error.classList.add('hidden');
+
+            nombreEstudiante = nombre;
+            grupoEstudiante = grupo;
+
+            document.getElementById('nombreDisplay').textContent = `Estudiante: ${nombre} | Grupo: ${grupo}`;
+            document.getElementById('reportNameDisplay').textContent = `🐙 ${nombre}`;
+
+            document.getElementById('page1').classList.add('hidden');
+            document.getElementById('page2').classList.remove('hidden');
+
+            // Iniciar cronómetro (oculto)
+            tiempoInicio = Date.now();
+            cronometroInterval = setInterval(() => {
+                tiempoSegundos = Math.floor((Date.now() - tiempoInicio) / 1000);
+            }, 1000);
+        }
+
+        // ==================== PAGINA 2: GENERAR DIAGRAMA ====================
+        function generateDiagram() {
+            let vacios = false;
+            for (let i = 1; i <= 8; i++) {
+                if (!document.getElementById(`t${i}`).value.trim()) vacios = true;
+            }
+            if (!document.getElementById('headAction').value.trim()) vacios = true;
+
+            if (vacios) {
+                alert('⚠️ Por favor completa todos los campos (8 estresores y el núcleo de bienestar) antes de generar el diagrama.');
+                return;
+            }
+
+            const palabrasProhibidas = ['puta', 'puto', 'mierda', 'verga', 'pendejo', 'pendeja', 'cabron', 'cabrona', 'chinga', 'chingar', 'pinche', 'culero', 'culera', 'joder', 'coño', 'carajo', 'hijueputa', 'hijuepucha', 'maricon', 'marica', 'gonorrea', 'malparido', 'malparida', 'pene', 'vagina', 'sexo', 'cojer', 'coger'];
+            
+            let textoCompleto = '';
+            for (let i = 1; i <= 8; i++) {
+                textoCompleto += document.getElementById(`t${i}`).value.toLowerCase() + ' ';
+            }
+            textoCompleto += document.getElementById('headAction').value.toLowerCase();
+
+            for (let palabra of palabrasProhibidas) {
+                if (textoCompleto.includes(palabra)) {
+                    alert('⚠️ Se ha detectado lenguaje inapropiado en tus respuestas. Por favor, exprésate con respeto y seriedad en este ejercicio académico.');
+                    return;
+                }
+            }
+
+            const headVal = document.getElementById('headAction').value.trim();
+            const headText = document.getElementById('svgHeadText');
+            if (headVal) {
+                headText.innerText = headVal;
+                headText.className = 'texto';
+            } else {
+                headText.innerText = '✨ Estrategia de bienestar pendiente de definir...';
+                headText.className = 'texto pendiente';
+            }
+
+            for (let i = 1; i <= 8; i++) {
+                const val = document.getElementById(`t${i}`).value.trim();
+                const textElement = document.getElementById(`svgT${i}`);
+                const container = document.getElementById(`svgT${i}-container`);
+                
+                if (val) {
+                    textElement.innerText = val;
+                    container.className = 'caja-estresor';
+                } else {
+                    textElement.innerText = '🌀 SIN ESTRESOR';
+                    container.className = 'caja-estresor pendiente';
+                }
+            }
+
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('page3').classList.remove('hidden');
+            document.getElementById('page3').classList.add('fade-in');
+            
+            window.scrollTo(0, 0);
+        }
+
+        function backToEdit() {
+            if (ejercicioFinalizado) {
+                alert('⚠️ Este ejercicio ya ha sido evaluado. No se permiten modificaciones.');
+                return;
+            }
+            document.getElementById('page3').classList.add('hidden');
+            document.getElementById('page3').classList.remove('fade-in');
+            document.getElementById('page2').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // ==================== PAGINA 3: ENVIAR A REVISIÓN ====================
+        function enviarRevision() {
+            if (ejercicioFinalizado) return;
+            
+            clearInterval(cronometroInterval);
+            tiempoFinal = Date.now();
+            const diff = Math.floor((tiempoFinal - tiempoInicio) / 1000);
+            tiempoSegundos = diff;
+            
+            const minutos = diff / 60;
+            let calif = 0;
+            
+            if (minutos > 15) {
+                calif = 10;
+                mensajeRetroalimentacion = '🌟 Excelente trabajo. Tu análisis es profundo y demuestra un gran esfuerzo de introspección.';
+            } else if (minutos >= 10 && minutos <= 14) {
+                calif = 9;
+                mensajeRetroalimentacion = '👍 Bien, tu análisis es aceptable. Te tomaste el tiempo necesario para tu reflexión.';
+            } else if (minutos >= 8 && minutos < 10) {
+                calif = 8;
+                mensajeRetroalimentacion = '📝 Tu trabajo requiere un análisis más detallado y mayor esfuerzo en tu autoconocimiento.';
+            } else if (minutos >= 6 && minutos < 8) {
+                calif = 7;
+                mensajeRetroalimentacion = '⚠️ Tu análisis fue superficial. Te cuesta trabajo reconocer tu contexto y personalidad.';
+            } else {
+                calif = 5;
+                mensajeRetroalimentacion = '❌ Cumpliste con el ejercicio, pero tu trabajo es deficiente. Se requiere mayor profundidad y sinceridad en tus reflexiones.';
+            }
+
+            calificacionFinal = calif;
+
+            document.getElementById('page3').classList.add('hidden');
+            document.getElementById('page4').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('page4').classList.add('hidden');
+                
+                document.getElementById('page3').classList.remove('hidden');
+                document.getElementById('page3').classList.add('fade-in');
+                
+                document.getElementById('calificacionBadge').textContent = calif;
+                document.getElementById('mensajeRetroalimentacion').textContent = mensajeRetroalimentacion;
+                document.getElementById('calificacionContainer').classList.remove('hidden');
+                
+                document.getElementById('mensajeCaptura').classList.remove('hidden');
+                
+                const btnEnviar = document.querySelector('.action-btn-success');
+                if (btnEnviar) btnEnviar.style.display = 'none';
+                
+                const btnBack = document.querySelector('.no-print .text-\\[var\\(--text-muted\\)\\]');
+                if (btnBack) {
+                    btnBack.innerHTML = '← Volver al inicio';
+                    btnBack.onclick = function() {
+                        window.location.reload();
+                    };
+                }
+
+                ejercicioFinalizado = true;
+                window.scrollTo(0, 0);
+            }, 10000);
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('page1').classList.remove('hidden');
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('page3').classList.add('hidden');
+            document.getElementById('page4').classList.add('hidden');
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const form = e.target.closest('form');
+                if (form) form.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
