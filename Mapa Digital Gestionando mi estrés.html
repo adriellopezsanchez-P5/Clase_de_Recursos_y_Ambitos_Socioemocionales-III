@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Digital: Gestionando mi estrés</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0a2a4a;
+            --bg-deep: #1a5a7a;
+            --bg-ocean: #2a8aaa;
+            --panel-bg: rgba(10, 42, 74, 0.75);
+            --text-main: #f9fafb;
+            --text-muted: #7ec8e3;
+            --border-glass: rgba(126, 200, 227, 0.3);
+            
+            --coral-pink: #FF6B6B;
+            --coral-orange: #FF9F43;
+            --coral-yellow: #FECA57;
+            --coral-teal: #00D2D3;
+            --coral-blue: #54A0FF;
+            --coral-purple: #A29BFE;
+            --coral-green: #55EFC4;
+            --coral-lavender: #D980FA;
+            
+            --caribbean-blue: #4DC9F6;
+            --caribbean-light: #89E0FF;
+            
+            --font-ui: 'Inter', sans-serif;
+            --font-data: 'Space Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: linear-gradient(135deg, #0a2a4a 0%, #1a5a7a 40%, #2a8aaa 70%, #4DC9F6 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .fondo-marino {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -3;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(255, 107, 107, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 159, 67, 0.10) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 100%, rgba(77, 201, 246, 0.15) 0%, transparent 60%),
+                linear-gradient(180deg, #0a2a4a 0%, #1a5a7a 30%, #2a8aaa 60%, #4DC9F6 100%);
+        }
+
+        .contenedor-burbujas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .burbuja {
+            position: absolute;
+            bottom: -120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(255,255,255,0.08));
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+            box-shadow: inset -4px -4px 12px rgba(255, 255, 255, 0.4), 
+                        inset 4px 4px 12px rgba(0, 0, 0, 0.15),
+                        0 0 40px rgba(77, 201, 246, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: subirBurbuja linear infinite;
+        }
+
+        .burbuja::after {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 22%;
+            width: 30%;
+            height: 25%;
+            background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 50%;
+            transform: rotate(-25deg);
+        }
+
+        @keyframes subirBurbuja {
+            0% { 
+                transform: translateY(0) scale(0.6) rotate(0deg); 
+                opacity: 0.2;
+            }
+            15% { 
+                opacity: 0.8;
+                transform: translateY(-10vh) scale(0.8) rotate(6deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-50vh) scale(1.1) rotate(-4deg);
+            }
+            85% {
+                opacity: 0.8;
+                transform: translateY(-90vh) scale(0.9) rotate(5deg);
+            }
+            100% { 
+                transform: translateY(-120vh) scale(0.5) rotate(-10deg); 
+                opacity: 0.05;
+            }
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 159, 67, 0.2));
+            color: #fff;
+            border: 1px solid rgba(255, 107, 107, 0.4);
+            font-family: var(--font-data);
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            backdrop-filter: blur(8px);
+            font-weight: 700;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, var(--coral-pink), var(--coral-orange));
+            color: #fff;
+            box-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .action-btn-success {
+            background: linear-gradient(135deg, #55EFC4, #4DC9F6);
+            color: #0a2a4a;
+            border: 2px solid #55EFC4;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 16px 32px;
+            box-shadow: 0 0 30px rgba(85, 239, 196, 0.3);
+        }
+
+        .action-btn-success:hover {
+            background: linear-gradient(135deg, #4DC9F6, #55EFC4);
+            box-shadow: 0 0 50px rgba(85, 239, 196, 0.5);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .fade-in { animation: fadeIn 0.6s ease forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulso {
+            animation: pulso 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulso {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .spin {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: var(--coral-pink); border-radius: 4px; }
+
+        .badge-calificacion {
+            display: inline-block;
+            background: rgba(254, 202, 87, 0.2);
+            border: 3px solid #FECA57;
+            border-radius: 20px;
+            padding: 8px 24px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #FECA57;
+            margin-top: 10px;
+        }
+
+        .calificacion-grande {
+            font-size: 6rem;
+            line-height: 1;
+            font-weight: 900;
+            text-shadow: 0 0 40px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Estilos para el ordenamiento con botones */
+        .opcion-orden {
+            background: rgba(10, 42, 74, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            backdrop-filter: blur(4px);
+        }
+
+        .opcion-orden .numero-orden {
+            display: inline-block;
+            font-family: var(--font-data);
+            font-size: 0.7rem;
+            color: var(--caribbean-light);
+            background: rgba(77, 201, 246, 0.15);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            text-align: center;
+            line-height: 28px;
+            flex-shrink: 0;
+        }
+
+        .opcion-orden .texto-paso {
+            flex: 1;
+        }
+
+        .opcion-orden .btn-mover {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--caribbean-light);
+            border-radius: 8px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            font-family: var(--font-data);
+            flex-shrink: 0;
+        }
+
+        .opcion-orden .btn-mover:hover {
+            background: rgba(77, 201, 246, 0.2);
+            border-color: var(--caribbean-blue);
+        }
+
+        .opcion-orden .btn-mover:active {
+            transform: scale(0.9);
+        }
+
+        .opcion-orden.correcta {
+            border-color: #55EFC4;
+            background: rgba(85, 239, 196, 0.15);
+        }
+
+        .opcion-orden.incorrecta {
+            border-color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.15);
+        }
+
+        .contenedor-orden {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 200px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .badge-estrategia {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: var(--font-data);
+        }
+
+        .badge-respiracion { background: rgba(255, 107, 107, 0.3); color: #FF6B6B; border: 1px solid rgba(255, 107, 107, 0.3); }
+        .badge-estiramientos { background: rgba(254, 202, 87, 0.3); color: #FECA57; border: 1px solid rgba(254, 202, 87, 0.3); }
+        .badge-sueno { background: rgba(77, 201, 246, 0.3); color: #4DC9F6; border: 1px solid rgba(77, 201, 246, 0.3); }
+
+        .nav-pestanas {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-pestana {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex: 1;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .nav-pestana:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-pestana.active {
+            border-color: var(--coral-pink);
+            background: rgba(255, 107, 107, 0.15);
+            color: white;
+        }
+
+        .nav-pestana.completada {
+            border-color: #55EFC4;
+            background: rgba(85, 239, 196, 0.1);
+            color: #55EFC4;
+        }
+
+        .btn-ordenar {
+            background: rgba(77, 201, 246, 0.15);
+            border: 1px solid rgba(77, 201, 246, 0.3);
+            color: var(--caribbean-light);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            font-family: var(--font-data);
+        }
+
+        .btn-ordenar:hover {
+            background: rgba(77, 201, 246, 0.25);
+        }
+
+        /* Estilos para el mapa de cajas final */
+        .mapa-final {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            padding: 20px 0;
+        }
+
+        .fila-mapa {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .caja-mapa-final {
+            background: rgba(10, 42, 74, 0.7);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 16px 20px;
+            min-width: 200px;
+            max-width: 280px;
+            flex: 1;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .caja-mapa-final .icono {
+            font-size: 1.5rem;
+        }
+
+        .caja-mapa-final .titulo {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--caribbean-light);
+        }
+
+        .caja-mapa-final .contenido {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+            margin-top: 4px;
+        }
+
+        .caja-mapa-final .numero-paso {
+            font-family: var(--font-data);
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .caja-mapa-final.correcto {
+            border-color: #55EFC4;
+            background: rgba(85, 239, 196, 0.1);
+        }
+
+        .caja-mapa-final.incorrecto {
+            border-color: #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .conector {
+            display: flex;
+            justify-content: center;
+            padding: 4px 0;
+            font-size: 1.5rem;
+            color: rgba(77, 201, 246, 0.3);
+        }
+
+        .conector-linea {
+            width: 2px;
+            height: 20px;
+            background: rgba(77, 201, 246, 0.2);
+            margin: 0 auto;
+        }
+
+        .titulo-estrategia-mapa {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .nav-pestana {
+                font-size: 0.7rem;
+                padding: 8px 12px;
+                min-width: 80px;
+            }
+            .opcion-orden {
+                font-size: 0.8rem;
+                padding: 10px 12px;
+                flex-wrap: wrap;
+            }
+            .caja-mapa-final {
+                min-width: 150px;
+                max-width: 100%;
+            }
+            .fila-mapa {
+                gap: 10px;
+            }
+        }
+
+        @media print {
+            body { 
+                background: #0a2a4a !important;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+            .no-print { display: none !important; }
+            .fondo-marino, .contenedor-burbujas { display: none !important; }
+            .glass-panel { border: 1px solid rgba(126, 200, 227, 0.3) !important; background: rgba(10, 42, 74, 0.9) !important; }
+            .calificacion-grande { font-size: 3rem !important; }
+            .caja-mapa-final.correcto { border-color: #55EFC4 !important; }
+            .caja-mapa-final.incorrecto { border-color: #FF6B6B !important; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Fondos -->
+    <div class="fondo-marino"></div>
+
+    <div class="contenedor-burbujas">
+        <div class="burbuja" style="left: 5%; width: 32px; height: 32px; animation-duration: 14s; animation-delay: 0s;"></div>
+        <div class="burbuja" style="left: 15%; width: 20px; height: 20px; animation-duration: 18s; animation-delay: 2.5s;"></div>
+        <div class="burbuja" style="left: 28%; width: 40px; height: 40px; animation-duration: 16s; animation-delay: 1.2s;"></div>
+        <div class="burbuja" style="left: 40%; width: 24px; height: 24px; animation-duration: 12s; animation-delay: 4s;"></div>
+        <div class="burbuja" style="left: 52%; width: 45px; height: 45px; animation-duration: 20s; animation-delay: 0.8s;"></div>
+        <div class="burbuja" style="left: 65%; width: 18px; height: 18px; animation-duration: 15s; animation-delay: 3.5s;"></div>
+        <div class="burbuja" style="left: 75%; width: 35px; height: 35px; animation-duration: 17s; animation-delay: 1.8s;"></div>
+        <div class="burbuja" style="left: 88%; width: 22px; height: 22px; animation-duration: 11s; animation-delay: 2.8s;"></div>
+        <div class="burbuja" style="left: 45%; width: 55px; height: 55px; animation-duration: 22s; animation-delay: 0.3s;"></div>
+        <div class="burbuja" style="left: 10%; width: 14px; height: 14px; animation-duration: 10s; animation-delay: 5.5s;"></div>
+        <div class="burbuja" style="left: 70%; width: 28px; height: 28px; animation-duration: 19s; animation-delay: 2s;"></div>
+        <div class="burbuja" style="left: 33%; width: 16px; height: 16px; animation-duration: 13s; animation-delay: 3.8s;"></div>
+    </div>
+
+    <!-- PAGINA 1: REGISTRO -->
+    <div id="page1" class="max-w-4xl mx-auto relative z-20 py-12 fade-in">
+        <div class="glass-panel p-8 md:p-12">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-[#FF6B6B] via-[#FECA57] to-[#4DC9F6] bg-clip-text text-transparent mb-3">🗺️ Mapa Digital: Gestionando mi estrés</h1>
+                <p class="text-[var(--caribbean-light)] font-data text-sm">Sistema de Ordenamiento de Estrategias para el Manejo del Estrés</p>
+            </div>
+
+            <div class="bg-[#FF6B6B]/10 border-2 border-[#FF6B6B]/30 rounded-xl p-5 mb-8">
+                <h3 class="font-bold text-[#FF6B6B] text-sm uppercase tracking-wider mb-2">⚠️ Instrucciones importantes</h3>
+                <ul class="text-sm text-slate-300 space-y-2 list-disc pl-5">
+                    <li><strong>Un solo intento:</strong> Esta actividad solo se puede realizar una vez. La calificación obtenida será definitiva.</li>
+                    <li><strong>Recomendación:</strong> Utiliza una <strong>computadora</strong> para una mejor experiencia.</li>
+                    <li><strong>Captura de pantalla:</strong> Al finalizar, deberás hacer <strong>captura de pantalla</strong> del mapa final.</li>
+                    <li><strong>Ordena las técnicas:</strong> Debes ordenar correctamente los pasos de las 3 técnicas anti-estrés.</li>
+                    <li><strong>Evaluación:</strong> La calificación se basa en el número de aciertos. Si completas en menos de 4 minutos, obtendrás 5.</li>
+                </ul>
+            </div>
+
+            <form onsubmit="handleRegistro(event)" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre completo del estudiante</label>
+                    <input type="text" id="nombreCompleto" required placeholder="Ej. Pérez Gómez, Ana María" 
+                           class="w-full px-4 py-3 bg-white/5 border-2 border-[#4DC9F6] text-white rounded-xl focus:outline-none focus:bg-white/10 font-data transition-all focus:border-[#FECA57]">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Grupo / Semestre</label>
+                    <input type="text" id="grupo" required placeholder="Ej. 401" 
+                           class="w-full px-4 py-3 bg-white/5 border-2 border-[#4DC9F6] text-white rounded-xl focus:outline-none focus:bg-white/10 font-data transition-all focus:border-[#FECA57]">
+                </div>
+                
+                <div id="error-registro" class="text-[#FF6B6B] font-data text-sm text-center hidden font-bold animate-pulse p-3 bg-[#FF6B6B]/10 rounded-xl">[!] COMPLETA TODOS LOS CAMPOS PARA CONTINUAR</div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-[#FF6B6B] to-[#FF9F43] text-white font-bold py-4 px-6 rounded-xl text-lg shadow-lg hover:opacity-90 transition transform active:scale-95 uppercase tracking-wider">
+                    🗺️ Iniciar Mapeo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PAGINA 2: EJERCICIO (Ordenamiento) -->
+    <div id="page2" class="hidden max-w-6xl mx-auto space-y-8 relative z-20 py-6">
+        
+        <div class="glass-panel p-4 md:p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white">🗺️ Ordena las Estrategias</h2>
+                    <p class="text-xs text-[var(--caribbean-light)] font-data" id="nombreDisplay">Estudiante: ---</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-xs text-slate-400">Progreso: <span id="progresoPestanas">0/3</span></span>
+                </div>
+            </div>
+        </div>
+
+        <section class="glass-panel p-6 md:p-10 fade-in">
+            
+            <!-- Navegación por pestañas -->
+            <div class="nav-pestanas no-print">
+                <div class="nav-pestana active" data-pestana="0" onclick="cambiarPestana(0)">
+                    🌬️ Respiración STOP
+                </div>
+                <div class="nav-pestana" data-pestana="1" onclick="cambiarPestana(1)">
+                    🧘 Estiramientos
+                </div>
+                <div class="nav-pestana" data-pestana="2" onclick="cambiarPestana(2)">
+                    😴 Higiene del Sueño
+                </div>
+            </div>
+
+            <!-- Contenido de las pestañas -->
+            <div id="contenidoPestanas">
+                <!-- Cada pestaña se renderiza con JavaScript -->
+            </div>
+
+            <!-- Botones de navegación -->
+            <div class="flex justify-between mt-6 no-print">
+                <button onclick="pestanaAnterior()" class="text-slate-400 hover:text-white text-sm font-semibold transition">
+                    ← Anterior
+                </button>
+                <button onclick="pestanaSiguiente()" class="text-slate-400 hover:text-white text-sm font-semibold transition">
+                    Siguiente →
+                </button>
+            </div>
+
+            <div class="text-center pt-6 no-print">
+                <button onclick="enviarTodo()" class="action-btn action-btn-success px-10 py-4 text-base flex items-center gap-3 shadow-2xl mx-auto">
+                    📤 Enviar todo a Revisión
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- PAGINA 3: MAPA DE CAJAS (Resultado) -->
+    <div id="page3" class="hidden max-w-6xl mx-auto space-y-6 relative z-20 pb-20 pt-6">
+        
+        <div class="no-print mb-6 flex flex-wrap gap-4 items-center justify-between">
+            <button onclick="window.location.reload()" class="text-[var(--text-muted)] hover:text-white font-data text-sm flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl backdrop-blur-sm border border-[var(--border-glass)] w-fit">
+                ← Volver al inicio
+            </button>
+        </div>
+
+        <div class="glass-panel p-6 md:p-8">
+            
+            <div class="text-center border-b border-[var(--border-glass)] pb-6 mb-6">
+                <h2 class="text-3xl font-bold text-[var(--coral-pink)] uppercase tracking-wide" id="reportNameDisplay">USUARIO</h2>
+                <p class="text-xs text-[var(--caribbean-light)] font-data mt-1">🗺️ MAPA DIGITAL: GESTIONANDO MI ESTRÉS</p>
+                <div id="calificacionContainer" class="hidden mt-3">
+                    <span class="badge-calificacion">🏆 Calificación: <span id="calificacionBadge">10</span></span>
+                    <p class="text-sm text-[var(--caribbean-light)] mt-3" id="mensajeRetroalimentacion"></p>
+                    <p class="text-xs text-slate-400 mt-1">✅ Ejercicio completado y evaluado</p>
+                </div>
+            </div>
+
+            <!-- MAPA DE CAJAS FINAL -->
+            <div id="mapaResultados" class="mapa-final">
+                <!-- Se llena con JavaScript -->
+            </div>
+            
+            <!-- Mensaje de captura de pantalla -->
+            <div id="mensajeCaptura" class="hidden text-center bg-[#FECA57]/10 border-2 border-[#FECA57]/40 rounded-xl p-4 mt-6">
+                <p class="text-sm text-[#FECA57] font-bold">📸 ¡Mapa completado!</p>
+                <p class="text-sm text-slate-300 mt-1">Realiza una <strong>captura de pantalla</strong> de este mapa con tu calificación visible para entregar tu evidencia.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGINA 4: EVALUACIÓN -->
+    <div id="page4" class="hidden max-w-2xl mx-auto relative z-20 py-20">
+        <div class="glass-panel p-12 text-center">
+            <div class="text-8xl mb-6 pulso">🗺️</div>
+            <h2 class="text-3xl font-bold text-white mb-4">Evaluando tu mapa...</h2>
+            <p class="text-[var(--caribbean-light)] mb-6">Por favor espera unos segundos mientras revisamos tus respuestas.</p>
+            <div class="flex justify-center gap-3 mb-8">
+                <div class="w-4 h-4 rounded-full bg-[#FF6B6B] animate-bounce" style="animation-delay: 0s;"></div>
+                <div class="w-4 h-4 rounded-full bg-[#FECA57] animate-bounce" style="animation-delay: 0.2s;"></div>
+                <div class="w-4 h-4 rounded-full bg-[#4DC9F6] animate-bounce" style="animation-delay: 0.4s;"></div>
+                <div class="w-4 h-4 rounded-full bg-[#55EFC4] animate-bounce" style="animation-delay: 0.6s;"></div>
+            </div>
+            <div class="text-sm text-slate-400 font-data">
+                <span class="spin inline-block mr-2">🔄</span> Procesando...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATOS DE LAS TÉCNICAS ====================
+        const ESTRATEGIAS = [{
+            id: 'respiracion',
+            nombre: 'Respiración STOP',
+            icono: '🌬️',
+            badgeClass: 'badge-respiracion',
+            color: '#FF6B6B',
+            colorClaro: 'rgba(255,107,107,0.2)',
+            pasosCorrectos: [
+                'Coloca una mano en el pecho y la otra en el diafragma (entre el estómago y el pecho).',
+                'Inhala profundamente por la nariz con cuenta regresiva de 5 a 1 segundos.',
+                'Exhala lentamente por la boca con cuenta inversa de 1 a 5 segundos.',
+                'Repite el ciclo pausadamente hasta sentir calma y control.'
+            ],
+            infoExtra: '⏱️ 1-2 minutos | 🎯 Exámenes, exposiciones'
+        }, {
+            id: 'estiramientos',
+            nombre: 'Estiramientos de Relajación Muscular',
+            icono: '🧘',
+            badgeClass: 'badge-estiramientos',
+            color: '#FECA57',
+            colorClaro: 'rgba(254,202,87,0.2)',
+            pasosCorrectos: [
+                'Gira el cuello pausadamente hacia cada lado, manteniendo 3-5 segundos.',
+                'Sube ambos hombros hacia las orejas, retén 3-5 segundos y suelta de golpe (3 veces).',
+                'Cruza las manos detrás de la nuca y mantén 3-5 segundos.',
+                'Jala suavemente el brazo opuesto por arriba de la cabeza (5 segundos, repetir con ambos).',
+                'Entrelaza los dedos con palmas hacia afuera y estira ambos brazos hacia arriba (5 segundos).'
+            ],
+            infoExtra: '⏱️ 3-5 minutos | 🎯 Recesos, cambios de clase'
+        }, {
+            id: 'sueno',
+            nombre: 'Higiene del Sueño y Détox Digital',
+            icono: '😴',
+            badgeClass: 'badge-sueno',
+            color: '#4DC9F6',
+            colorClaro: 'rgba(77,201,246,0.2)',
+            pasosCorrectos: [
+                'Establece horarios estables para acostarte y levantarte (7-9 horas).',
+                'Evita pantallas (celular, TV, tablet) al menos 30 minutos antes de dormir.',
+                'Cena ligero y evita alimentos irritantes o grasosos.',
+                'Realiza estiramientos suaves o respiración guiada antes de dormir.'
+            ],
+            infoExtra: '⏱️ 7-9 horas | 🎯 Descanso reparador diario'
+        }];
+
+        // ==================== VARIABLES GLOBALES ====================
+        let tiempoInicio = null;
+        let tiempoFinal = null;
+        let cronometroInterval = null;
+        let nombreEstudiante = '';
+        let grupoEstudiante = '';
+        let calificacionFinal = 0;
+        let ejercicioFinalizado = false;
+        let mensajeRetroalimentacion = '';
+        let pestanaActual = 0;
+        let tiempoSegundos = 0;
+        let ordenesAlumno = {
+            respiracion: [],
+            estiramientos: [],
+            sueno: []
+        };
+        let resultadosEvaluacion = {};
+
+        // ==================== PAGINA 1: REGISTRO ====================
+        function handleRegistro(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombreCompleto').value.trim();
+            const grupo = document.getElementById('grupo').value.trim();
+            const error = document.getElementById('error-registro');
+
+            if (!nombre || !grupo) {
+                error.classList.remove('hidden');
+                return;
+            }
+            error.classList.add('hidden');
+
+            nombreEstudiante = nombre;
+            grupoEstudiante = grupo;
+
+            document.getElementById('nombreDisplay').textContent = `Estudiante: ${nombre} | Grupo: ${grupo}`;
+            document.getElementById('reportNameDisplay').textContent = `🗺️ ${nombre}`;
+
+            document.getElementById('page1').classList.add('hidden');
+            document.getElementById('page2').classList.remove('hidden');
+
+            tiempoInicio = Date.now();
+            cronometroInterval = setInterval(() => {
+                tiempoSegundos = Math.floor((Date.now() - tiempoInicio) / 1000);
+            }, 1000);
+
+            inicializarPestanas();
+            cambiarPestana(0);
+        }
+
+        // ==================== FUNCIONES DE PESTAÑAS ====================
+        function inicializarPestanas() {
+            ESTRATEGIAS.forEach((estrategia, idx) => {
+                const pasosMezclados = [...estrategia.pasosCorrectos];
+                for (let i = pasosMezclados.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pasosMezclados[i], pasosMezclados[j]] = [pasosMezclados[j], pasosMezclados[i]];
+                }
+                const key = estrategia.id;
+                ordenesAlumno[key] = pasosMezclados;
+            });
+            renderPestana(0);
+        }
+
+        function renderPestana(idx) {
+            const container = document.getElementById('contenidoPestanas');
+            const estrategia = ESTRATEGIAS[idx];
+            const key = estrategia.id;
+            const pasos = ordenesAlumno[key] || [];
+
+            container.innerHTML = `
+                <div class="bg-cosmic-900/30 rounded-xl p-4 md:p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl">${estrategia.icono}</span>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">${estrategia.nombre}</h3>
+                            <p class="text-xs text-slate-400">${estrategia.infoExtra}</p>
+                        </div>
+                        <span class="${estrategia.badgeClass} badge-estrategia ml-auto">${estrategia.id}</span>
+                    </div>
+
+                    <p class="text-sm text-slate-300 mb-4">
+                        <strong>Instrucción:</strong> Usa los botones <strong>▲</strong> y <strong>▼</strong> para mover cada paso a la posición correcta.
+                    </p>
+
+                    <div class="contenedor-orden" id="contenedor-${key}">
+                        ${pasos.length === 0 ? `
+                            <div class="text-center text-slate-400 py-8">No hay pasos para ordenar</div>
+                        ` : pasos.map((paso, index) => `
+                            <div class="opcion-orden" id="item-${key}-${index}">
+                                <span class="numero-orden">${index + 1}</span>
+                                <span class="texto-paso">${paso}</span>
+                                <button class="btn-mover" onclick="moverPaso('${key}', ${index}, -1)" title="Mover arriba">▲</button>
+                                <button class="btn-mover" onclick="moverPaso('${key}', ${index}, 1)" title="Mover abajo">▼</button>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        <button onclick="mezclarPestana(${idx})" class="btn-ordenar">🔀 Mezclar</button>
+                        <button onclick="resetearPestana(${idx})" class="btn-ordenar">🔄 Reiniciar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function moverPaso(key, index, direccion) {
+            if (ejercicioFinalizado) return;
+            const pasos = [...ordenesAlumno[key]];
+            const nuevoIndex = index + direccion;
+            
+            if (nuevoIndex < 0 || nuevoIndex >= pasos.length) return;
+            
+            [pasos[index], pasos[nuevoIndex]] = [pasos[nuevoIndex], pasos[index]];
+            ordenesAlumno[key] = pasos;
+            renderPestana(pestanaActual);
+        }
+
+        function cambiarPestana(idx) {
+            if (ejercicioFinalizado) return;
+            pestanaActual = idx;
+            
+            document.querySelectorAll('.nav-pestana').forEach((el, i) => {
+                el.classList.toggle('active', i === idx);
+            });
+            
+            renderPestana(idx);
+        }
+
+        function pestanaSiguiente() {
+            if (ejercicioFinalizado) return;
+            const next = (pestanaActual + 1) % ESTRATEGIAS.length;
+            cambiarPestana(next);
+        }
+
+        function pestanaAnterior() {
+            if (ejercicioFinalizado) return;
+            const prev = (pestanaActual - 1 + ESTRATEGIAS.length) % ESTRATEGIAS.length;
+            cambiarPestana(prev);
+        }
+
+        function mezclarPestana(idx) {
+            if (ejercicioFinalizado) return;
+            const key = ESTRATEGIAS[idx].id;
+            const pasos = [...ordenesAlumno[key]];
+            for (let i = pasos.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pasos[i], pasos[j]] = [pasos[j], pasos[i]];
+            }
+            ordenesAlumno[key] = pasos;
+            renderPestana(idx);
+        }
+
+        function resetearPestana(idx) {
+            if (ejercicioFinalizado) return;
+            const key = ESTRATEGIAS[idx].id;
+            const estrategia = ESTRATEGIAS[idx];
+            const pasos = [...estrategia.pasosCorrectos];
+            for (let i = pasos.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pasos[i], pasos[j]] = [pasos[j], pasos[i]];
+            }
+            ordenesAlumno[key] = pasos;
+            renderPestana(idx);
+        }
+
+        // ==================== EVALUACIÓN Y ENVÍO ====================
+        function enviarTodo() {
+            if (ejercicioFinalizado) return;
+
+            let todasCompletas = true;
+            ESTRATEGIAS.forEach(estrategia => {
+                const key = estrategia.id;
+                if (ordenesAlumno[key].length !== estrategia.pasosCorrectos.length) {
+                    todasCompletas = false;
+                }
+            });
+
+            if (!todasCompletas) {
+                alert('⚠️ Hay pasos faltantes en algunas estrategias. Asegúrate de que todas estén completas.');
+                return;
+            }
+
+            // Calcular tiempo
+            tiempoFinal = Date.now();
+            const diff = Math.floor((tiempoFinal - tiempoInicio) / 1000);
+            tiempoSegundos = diff;
+            const minutos = diff / 60;
+
+            // Evaluar aciertos
+            let totalAciertos = 0;
+            let totalPasos = 0;
+            
+            ESTRATEGIAS.forEach(estrategia => {
+                const key = estrategia.id;
+                const ordenAlumno = ordenesAlumno[key];
+                const correcto = estrategia.pasosCorrectos;
+                const aciertos = ordenAlumno.filter((paso, idx) => paso === correcto[idx]).length;
+                resultadosEvaluacion[key] = {
+                    aciertos: aciertos,
+                    total: correcto.length,
+                    porcentaje: (aciertos / correcto.length) * 100,
+                    detalles: ordenAlumno.map((paso, idx) => ({
+                        paso: paso,
+                        esCorrecto: paso === correcto[idx],
+                        posicionCorrecta: idx + 1,
+                        textoCorrecto: correcto[idx]
+                    }))
+                };
+                totalAciertos += aciertos;
+                totalPasos += correcto.length;
+            });
+
+            // Calcular calificación (10 puntos máximo basado en aciertos)
+            const porcentajeGlobal = (totalAciertos / totalPasos) * 100;
+            let calif = 0;
+            
+            // Si el tiempo fue menor a 4 minutos, calificación = 5
+            if (minutos < 4) {
+                calif = 5;
+                mensajeRetroalimentacion = '⏱️ Completaste el ejercicio en menos de 4 minutos. Tu calificación se ha ajustado a 5. Recuerda que la reflexión y el análisis cuidadoso son parte importante del aprendizaje.';
+            } else if (porcentajeGlobal >= 95) {
+                calif = 10;
+                mensajeRetroalimentacion = '🌟 Excelente trabajo. Has ordenado correctamente todas las técnicas. Dominas las estrategias anti-estrés.';
+            } else if (porcentajeGlobal >= 80) {
+                calif = 9;
+                mensajeRetroalimentacion = '👍 Muy bien. La mayoría de los pasos están en el orden correcto. Sigue practicando.';
+            } else if (porcentajeGlobal >= 65) {
+                calif = 8;
+                mensajeRetroalimentacion = '📝 Buen intento. Revisa el orden de algunos pasos y familiarízate mejor con cada técnica.';
+            } else if (porcentajeGlobal >= 50) {
+                calif = 7;
+                mensajeRetroalimentacion = '⚠️ Es importante que repases el orden correcto de cada técnica. Dedica más tiempo a comprenderlas.';
+            } else {
+                calif = 5;
+                mensajeRetroalimentacion = '❌ Te recomendamos repasar la guía de técnicas anti-estrés. El orden de los pasos es fundamental para su efectividad.';
+            }
+
+            calificacionFinal = calif;
+
+            // Mostrar página de carga
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('page4').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('page4').classList.add('hidden');
+                mostrarResultados();
+            }, 10000);
+        }
+
+        function mostrarResultados() {
+            document.getElementById('page3').classList.remove('hidden');
+            document.getElementById('page3').classList.add('fade-in');
+            
+            document.getElementById('calificacionBadge').textContent = calificacionFinal;
+            document.getElementById('mensajeRetroalimentacion').textContent = mensajeRetroalimentacion;
+            document.getElementById('calificacionContainer').classList.remove('hidden');
+            document.getElementById('mensajeCaptura').classList.remove('hidden');
+
+            // Generar mapa de cajas final
+            const container = document.getElementById('mapaResultados');
+            container.innerHTML = '';
+
+            ESTRATEGIAS.forEach((estrategia, idx) => {
+                const key = estrategia.id;
+                const resultado = resultadosEvaluacion[key];
+                
+                // Título de la estrategia
+                const tituloDiv = document.createElement('div');
+                tituloDiv.className = 'titulo-estrategia-mapa';
+                tituloDiv.style.border = `2px solid ${estrategia.color}`;
+                tituloDiv.style.background = estrategia.colorClaro;
+                tituloDiv.innerHTML = `
+                    ${estrategia.icono} ${estrategia.nombre} 
+                    <span style="color: ${estrategia.color}; font-size: 0.8rem;">
+                        (${resultado.aciertos}/${resultado.total} aciertos)
+                    </span>
+                `;
+                container.appendChild(tituloDiv);
+
+                // Fila de cajas
+                const fila = document.createElement('div');
+                fila.className = 'fila-mapa';
+
+                resultado.detalles.forEach((detalle, i) => {
+                    const caja = document.createElement('div');
+                    caja.className = `caja-mapa-final ${detalle.esCorrecto ? 'correcto' : 'incorrecto'}`;
+                    caja.style.borderColor = detalle.esCorrecto ? '#55EFC4' : '#FF6B6B';
+                    
+                    caja.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="numero-paso">Paso ${i+1}</span>
+                            <span class="icono">${detalle.esCorrecto ? '✅' : '❌'}</span>
+                        </div>
+                        <div class="titulo">${detalle.esCorrecto ? '✓ Correcto' : '✗ Incorrecto'}</div>
+                        <div class="contenido">${detalle.paso}</div>
+                        ${!detalle.esCorrecto ? `
+                            <div class="contenido" style="color: #55EFC4; font-size: 0.7rem; margin-top: 4px;">
+                                Correcto: ${detalle.textoCorrecto}
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    fila.appendChild(caja);
+
+                    // Conector entre cajas (flecha)
+                    if (i < resultado.detalles.length - 1) {
+                        const conector = document.createElement('div');
+                        conector.className = 'conector';
+                        conector.innerHTML = '➡';
+                        conector.style.color = detalle.esCorrecto ? 'rgba(85,239,196,0.3)' : 'rgba(255,107,107,0.3)';
+                        fila.appendChild(conector);
+                    }
+                });
+
+                container.appendChild(fila);
+
+                // Conector entre estrategias
+                if (idx < ESTRATEGIAS.length - 1) {
+                    const conectorGrande = document.createElement('div');
+                    conectorGrande.className = 'conector';
+                    conectorGrande.innerHTML = '⬇';
+                    conectorGrande.style.fontSize = '2rem';
+                    conectorGrande.style.color = 'rgba(77,201,246,0.2)';
+                    conectorGrande.style.padding = '10px 0';
+                    container.appendChild(conectorGrande);
+                }
+            });
+
+            ejercicioFinalizado = true;
+            window.scrollTo(0, 0);
+        }
+
+        // ==================== INICIALIZACIÓN ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('page1').classList.remove('hidden');
+            document.getElementById('page2').classList.add('hidden');
+            document.getElementById('page3').classList.add('hidden');
+            document.getElementById('page4').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
