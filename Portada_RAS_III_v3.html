@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Recursos y Ámbitos Socioemocionales III — Tercer semestre. Portada de la asignatura: propósito, módulos, evaluación y laboratorios interactivos." />
+    <title>Recursos y Ámbitos Socioemocionales III</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230f3d2a'/%3E%3Cpath d='M6 18c0-6 4-10 12-11-1 8-5 12-11 12-.5 0-1-.4-1-1z' fill='%234dd0b0'/%3E%3C/svg%3E" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* ---- verde: base (más oscuro para dar contraste a las tarjetas) ---- */
+            --bg-void: #051610;
+            --bg-primary: #0a2e1f;
+            --bg-secondary: #144a30;
+            --bg-tertiary: #206640;
+            --bg-light: #2f8a55;
+            --mesh-a: #124531;
+            --mesh-b: #1f6e46;
+            --mesh-c: #071f16;
+
+            /* ---- texto ---- */
+            --text-main: #f5f9f6;
+            --text-muted: #a9cdb8;
+            --text-dim: #7fa590;
+
+            /* ---- acentos ---- */
+            --accent-gold: #f0c93e;
+            --accent-sun: #ffdd55;
+            --accent-mint: #4dd0b0;
+            --accent-coral: #ff8a65;
+
+            /* ---- superficie de tarjeta (más clara / saturada para contrastar con el fondo) ---- */
+            --card-bg-1: rgba(255, 255, 255, 0.16);
+            --card-bg-2: rgba(255, 255, 255, 0.055);
+            --card-border: rgba(255, 255, 255, 0.24);
+
+            --line: rgba(255, 255, 255, 0.09);
+            --line-soft: rgba(255, 255, 255, 0.06);
+            --shadow-card: 0 22px 46px rgba(2, 12, 8, 0.55);
+            --radius-lg: 26px;
+            --radius-md: 18px;
+            --radius-sm: 10px;
+
+            --font-display: 'Fraunces', Georgia, serif;
+            --font-main: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'Space Mono', monospace;
+
+            --nav-h: 64px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: calc(var(--nav-h) + 24px);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: background 0.8s ease;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ========== FONDO: MALLA DE VERDES + GRANO ========== */
+        .mesh-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 45% at 85% 8%, rgba(240, 201, 62, 0.10), transparent 60%),
+                radial-gradient(ellipse 55% 50% at 8% 15%, var(--mesh-b) 0%, transparent 62%),
+                radial-gradient(ellipse 60% 55% at 92% 60%, var(--mesh-a) 0%, transparent 65%),
+                radial-gradient(ellipse 70% 60% at 30% 95%, var(--mesh-c) 0%, transparent 60%);
+            opacity: 0.55;
+            filter: blur(10px);
+            transition: opacity 0.8s ease;
+        }
+
+        .grain {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.045;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* ========== CORRIENTES DE VIENTO (fondo animado) ========== */
+        .wind-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .wind-layer svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .wind-line {
+            fill: none;
+            stroke-linecap: round;
+            opacity: 0.3;
+            animation: windFlow linear infinite;
+        }
+
+        .wind-line.w1 { stroke: var(--accent-mint); stroke-width: 1.4; opacity: 0.22; animation-duration: 26s; }
+        .wind-line.w2 { stroke: var(--bg-light);    stroke-width: 1.8; opacity: 0.16; animation-duration: 34s; animation-delay: -6s; }
+        .wind-line.w3 { stroke: var(--accent-gold); stroke-width: 1.1; opacity: 0.14; animation-duration: 40s; animation-delay: -14s; }
+        .wind-line.w4 { stroke: var(--accent-mint); stroke-width: 1.2; opacity: 0.18; animation-duration: 22s; animation-delay: -3s; }
+        .wind-line.w5 { stroke: var(--bg-light);    stroke-width: 2.2; opacity: 0.12; animation-duration: 46s; animation-delay: -20s; }
+        .wind-line.w6 { stroke: var(--accent-gold); stroke-width: 1;   opacity: 0.16; animation-duration: 30s; animation-delay: -10s; }
+
+        @keyframes windFlow {
+            0%   { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: -1400; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .wind-line { animation: none; }
+        }
+
+        /* ========== NAV STICKY + BARRA DE PROGRESO ========== */
+        .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            height: var(--nav-h);
+            display: flex;
+            align-items: center;
+            background: rgba(9, 33, 22, 0.72);
+            backdrop-filter: blur(14px) saturate(140%);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .nav-brand svg { color: var(--accent-mint); }
+        .nav-brand strong { color: var(--text-main); font-weight: 700; }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            display: block;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 20px;
+            transition: color 0.25s ease, background 0.25s ease;
+            white-space: nowrap;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-links a.active {
+            color: var(--bg-primary);
+            background: var(--accent-mint);
+            font-weight: 700;
+        }
+
+        .nav-links a:focus-visible,
+        .lab-card:focus-visible,
+        .sun:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 2px;
+        }
+
+        .progress-track {
+            position: sticky;
+            top: var(--nav-h);
+            z-index: 199;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-mint), var(--accent-gold));
+            transition: width 0.1s linear;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+        }
+
+        /* ========== SOL (ilustración SVG) ========== */
+        .sun-container {
+            position: fixed;
+            top: -55px;
+            right: -35px;
+            width: 220px;
+            height: 220px;
+            z-index: 90;
+            pointer-events: none;
+            transition: all 0.1s ease;
+        }
+
+        .sun {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: none;
+            padding: 0;
+            background: transparent;
+            cursor: pointer;
+            pointer-events: auto;
+            filter: drop-shadow(0 0 46px rgba(245, 215, 66, 0.4)) drop-shadow(0 0 90px rgba(245, 215, 66, 0.18));
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
+        }
+
+        .sun svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+        .sun-rays {
+            transform-box: view-box;
+            transform-origin: 100px 100px;
+            animation: sunSpin 50s linear infinite;
+            transition: opacity 0.4s ease;
+        }
+
+        .sun-core-pulse {
+            transform-box: view-box;
+            transform-origin: 100px 100px;
+            animation: sunBreathe 5s ease-in-out infinite;
+        }
+
+        @keyframes sunSpin { to { transform: rotate(360deg); } }
+        @keyframes sunBreathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.045); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .sun-rays, .sun-core-pulse { animation: none; }
+        }
+
+        .sun-caption {
+            position: absolute;
+            bottom: 4px;
+            right: 42px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(5, 22, 16, 0.75);
+            border: 1px solid var(--line-soft);
+            padding: 3px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .sun-container:hover .sun-caption,
+        .sun-container:focus-within .sun-caption {
+            opacity: 1;
+        }
+
+        /* ========== PLANTA (ilustración SVG orgánica) ========== */
+        .plant-container {
+            position: fixed;
+            bottom: 0;
+            left: 24px;
+            z-index: 90;
+            pointer-events: none;
+            width: 150px;
+            height: 220px;
+        }
+
+        .plant-container svg { width: 100%; height: 100%; overflow: visible; }
+
+        .plant {
+            transform-box: view-box;
+            transform-origin: 75px 210px;
+        }
+
+        .plant-stem {
+            fill: none;
+            stroke: url(#stemGradient);
+            stroke-width: 3.4;
+            stroke-linecap: round;
+            stroke-dasharray: 210;
+            stroke-dashoffset: 210;
+            transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+            filter: drop-shadow(0 3px 6px rgba(0, 20, 10, 0.35));
+        }
+
+        .plant-stem.grown { stroke-dashoffset: 0; }
+
+        .leaf {
+            transform-box: fill-box;
+            transform-origin: bottom center;
+            opacity: 0;
+            transform: scale(0.2) rotate(var(--rot-start, -30deg));
+            transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 8px rgba(0, 25, 12, 0.35));
+        }
+
+        .leaf.show {
+            opacity: 1;
+            transform: scale(1) rotate(var(--rot-end, 0deg));
+            animation: leafSway var(--sway-dur, 5s) ease-in-out var(--sway-delay, 0s) infinite;
+        }
+
+        .leaf-1 { --rot-start: -55deg; --rot-end: -18deg; --sway-dur: 4.5s; --sway-delay: 0.1s; transition-delay: 0.15s; }
+        .leaf-2 { --rot-start: 55deg;  --rot-end: 16deg;  --sway-dur: 5.2s; --sway-delay: 0.6s; transition-delay: 0.4s; }
+        .leaf-3 { --rot-start: -50deg; --rot-end: -22deg; --sway-dur: 4.8s; --sway-delay: 0.3s; transition-delay: 0.7s; }
+        .leaf-4 { --rot-start: 50deg;  --rot-end: 20deg;  --sway-dur: 5.6s; --sway-delay: 0.9s; transition-delay: 1s; }
+        .leaf-5 { --rot-start: -40deg; --rot-end: -10deg; --sway-dur: 5s;   --sway-delay: 0.5s; transition-delay: 1.25s; }
+
+        @keyframes leafSway {
+            0%, 100% { transform: scale(1) rotate(var(--rot-end)); }
+            50% { transform: scale(1) rotate(calc(var(--rot-end) + 6deg)); }
+        }
+
+        .bud {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+            transform: scale(0.3);
+            transition: opacity 1s ease 1.4s, transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 1.4s;
+            filter: drop-shadow(0 0 10px rgba(240, 201, 62, 0.55));
+        }
+
+        .bud.bloom { opacity: 1; transform: scale(1); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .leaf.show { animation: none; }
+        }
+
+        @media (max-width: 900px) {
+            .plant-container, .sun-container { display: none; }
+        }
+
+        /* ========== SCROLL HINT ========== */
+        .scroll-hint {
+            position: fixed;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            pointer-events: none;
+            opacity: 0.55;
+            transition: opacity 0.4s ease;
+        }
+
+        .scroll-hint svg { animation: bounceArrow 2s ease-in-out infinite; }
+
+        @keyframes bounceArrow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(6px); }
+        }
+
+        /* ========== LAYOUT ========== */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            padding: 56px 0 32px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 44px;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            font-optical-sizing: auto;
+            letter-spacing: -0.01em;
+            line-height: 1.08;
+            text-shadow: 0 2px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .header-left h1 .highlight { color: var(--accent-gold); font-style: italic; }
+
+        .header-left .sub {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 10px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(77, 208, 176, 0.1);
+            border: 1px solid rgba(77, 208, 176, 0.25);
+            padding: 9px 20px 9px 16px;
+            border-radius: 40px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent-mint);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .header-badge svg { flex-shrink: 0; }
+
+        /* ========== META ========== */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1px;
+            margin-top: 28px;
+            background: var(--line-soft);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--line-soft);
+            overflow: hidden;
+        }
+
+        .meta-item {
+            background: rgba(7, 31, 22, 0.55);
+            padding: 16px 20px;
+        }
+
+        .meta-item .label {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-dim);
+            font-weight: 400;
+            display: block;
+        }
+
+        .meta-item .value {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-top: 4px;
+        }
+
+        /* ========== SECCIONES ========== */
+        .section {
+            margin-bottom: 64px;
+            scroll-margin-top: calc(var(--nav-h) + 24px);
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .section.in-view { opacity: 1; transform: translateY(0); }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .section-title .bar {
+            width: 6px;
+            height: 32px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .section-title .bar.gold { background: var(--accent-gold); }
+        .section-title .bar.green { background: #66bb6a; }
+        .section-title .bar.mint { background: var(--accent-mint); }
+        .section-title .bar.coral { background: var(--accent-coral); }
+
+        /* ========== SUPERFICIES BASE (cards) ========== */
+        .surface {
+            background: linear-gradient(160deg, var(--card-bg-1), var(--card-bg-2));
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            backdrop-filter: blur(10px) saturate(120%);
+            box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .surface:hover {
+            background: linear-gradient(160deg, rgba(255,255,255,0.21), rgba(255,255,255,0.07));
+            border-color: rgba(255, 255, 255, 0.34);
+            transform: translateY(-2px);
+        }
+
+        .lab-card.surface:hover { transform: translateY(-5px); }
+
+        .card { padding: 30px 32px; }
+
+        .card p {
+            font-size: 1.12rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.75;
+        }
+
+        .card p strong { color: #fff; font-weight: 700; }
+        .card p .highlight-gold { color: var(--accent-gold); }
+        .card p .highlight-teal { color: var(--accent-mint); }
+
+        /* ========== MÓDULOS ========== */
+        .mod-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .mod-card { padding: 26px; }
+
+        .mod-card:hover { transform: translateY(-3px); }
+
+        .mod-card .icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(77, 208, 176, 0.12);
+            color: var(--accent-mint);
+            margin-bottom: 14px;
+        }
+
+        .mod-card h4 {
+            font-family: var(--font-display);
+            font-size: 1.08rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .mod-card p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        /* ========== EVALUACIÓN ========== */
+        .eval-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .eval-card {
+            padding: 24px 26px;
+            border-left: 3px solid var(--line);
+        }
+
+        .eval-card.tier-mint { border-left-color: var(--accent-mint); }
+        .eval-card.tier-gold { border-left-color: var(--accent-gold); }
+        .eval-card.tier-coral { border-left-color: var(--accent-coral); }
+
+        .eval-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .eval-card.tier-mint h4 { color: var(--accent-mint); }
+        .eval-card.tier-gold h4 { color: var(--accent-gold); }
+        .eval-card.tier-coral h4 { color: var(--accent-coral); }
+
+        .eval-card ul { list-style: none; }
+
+        .eval-card ul li {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.82);
+            padding: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px dashed var(--line-soft);
+        }
+
+        .eval-card ul li:last-child { border-bottom: none; }
+
+        .eval-card .note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line-soft);
+            font-style: italic;
+        }
+
+        .eval-card .note strong { color: var(--accent-gold); font-style: normal; }
+
+        /* ========== INSTRUCCIONES ========== */
+        .instructions-box {
+            background: rgba(255, 138, 101, 0.07);
+            border: 1px solid rgba(255, 138, 101, 0.18);
+            border-left: 4px solid var(--accent-coral);
+            border-radius: var(--radius-md);
+            padding: 26px 28px;
+        }
+
+        .instructions-box h4 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent-coral);
+            margin-bottom: 14px;
+        }
+
+        .instructions-box ul { list-style: none; }
+
+        .instructions-box ul li {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.82);
+            padding: 5px 0;
+            padding-left: 22px;
+            position: relative;
+        }
+
+        .instructions-box ul li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+        }
+
+        .instructions-box ul li strong { color: #fff; font-weight: 600; }
+
+        /* ========== LABORATORIOS ========== */
+        .lab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 18px;
+        }
+
+        .lab-card {
+            padding: 24px 26px;
+            text-decoration: none;
+            color: var(--text-main);
+            display: block;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .lab-card .lab-icon {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            margin-bottom: 12px;
+        }
+
+        .lab-card .lab-title {
+            font-family: var(--font-display);
+            font-size: 1.08rem;
+            font-weight: 600;
+        }
+
+        .lab-card .lab-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            line-height: 1.45;
+        }
+
+        .lab-card .lab-module {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-top: 14px;
+            background: var(--line-soft);
+            color: var(--text-muted);
+            border: 1px solid var(--line-soft);
+        }
+
+        .lab-card .lab-module.m1 { background: rgba(77, 208, 176, 0.12); color: var(--accent-mint); border-color: rgba(77, 208, 176, 0.2); }
+        .lab-card .lab-module.m2 { background: rgba(255, 138, 101, 0.12); color: var(--accent-coral); border-color: rgba(255, 138, 101, 0.2); }
+        .lab-card .lab-module.m3 { background: rgba(102, 187, 106, 0.12); color: #66bb6a; border-color: rgba(102, 187, 106, 0.2); }
+        .lab-card .lab-module.m4 { background: rgba(240, 201, 62, 0.12); color: var(--accent-gold); border-color: rgba(240, 201, 62, 0.2); }
+
+        .lab-card .lab-module.m1 ~ .lab-icon,
+        .lab-card:has(.lab-module.m1) .lab-icon { color: var(--accent-mint); }
+
+        .lab-card:has(.lab-module.m1) .lab-icon { background: rgba(77, 208, 176, 0.12); }
+        .lab-card:has(.lab-module.m2) .lab-icon { background: rgba(255, 138, 101, 0.12); color: var(--accent-coral); }
+        .lab-card:has(.lab-module.m3) .lab-icon { background: rgba(102, 187, 106, 0.12); color: #66bb6a; }
+        .lab-card:has(.lab-module.m4) .lab-icon { background: rgba(240, 201, 62, 0.12); color: var(--accent-gold); }
+
+        .lab-card.disabled {
+            opacity: 0.42;
+            cursor: default;
+            border-style: dashed;
+        }
+
+        .lab-card.disabled:hover { transform: none; box-shadow: none; }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            border-top: 1px solid var(--line-soft);
+            padding: 40px 0 48px;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .footer .name {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .footer .title-role {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .footer .copy {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-dim);
+            margin-top: 16px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .header-inner { flex-direction: column; align-items: stretch; }
+            .header-badge { align-self: flex-start; }
+            .meta-grid { grid-template-columns: 1fr 1fr; }
+            .lab-grid, .mod-grid, .eval-grid { grid-template-columns: 1fr; }
+            .card p { font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .meta-grid { grid-template-columns: 1fr; }
+            .container { padding: 0 16px; }
+            .header { padding: 28px 0; }
+            .card { padding: 22px; }
+            .eval-card, .mod-card, .lab-card { padding: 20px; }
+        }
+
+        /* Scroll */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.15); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-gold); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- ============================== -->
+    <!-- SPRITE DE ICONOS (SVG)         -->
+    <!-- ============================== -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 20c0-8 5-13 15-14-1 10-6 15-14 15-.6 0-1-.4-1-1z"/>
+                <path d="M6 20c2-3 5-6 9-8"/>
+            </symbol>
+            <symbol id="i-smartphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="2" width="12" height="20" rx="2.2"/>
+                <line x1="11" y1="18.3" x2="13" y2="18.3"/>
+            </symbol>
+            <symbol id="i-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2,13 7,13 9.5,6 14,20 16.5,13 22,13"/>
+            </symbol>
+            <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l7 3.5v5.2c0 5-3 8.8-7 10.3-4-1.5-7-5.3-7-10.3V6.5z"/>
+            </symbol>
+            <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </symbol>
+            <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v17H4.5C3.7 20 3 19.3 3 18.5z"/>
+                <path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v17h6.5c.8 0 1.5-.7 1.5-1.5z"/>
+            </symbol>
+            <symbol id="i-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4.5" y="3.5" width="15" height="18" rx="2"/>
+                <path d="M9 3.5h6v3H9z"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+                <line x1="8" y1="16" x2="14" y2="16"/>
+            </symbol>
+            <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 5.5l6-2 6 2 6-2v15l-6 2-6-2-6 2z"/>
+                <line x1="9" y1="3.5" x2="9" y2="18.5"/>
+                <line x1="15" y1="5.5" x2="15" y2="20.5"/>
+            </symbol>
+            <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3.5l9.5 16.5h-19z"/>
+                <line x1="12" y1="10" x2="12" y2="14.5"/>
+                <circle cx="12" cy="17.2" r="0.6" fill="currentColor" stroke="none"/>
+            </symbol>
+            <symbol id="i-waves" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 8c1.5 0 1.5 2.4 3 2.4S6.5 8 8 8s1.5 2.4 3 2.4S12.5 8 14 8s1.5 2.4 3 2.4S18.5 8 20 8s1.5 2.4 2 2.4"/>
+                <path d="M2 15c1.5 0 1.5 2.4 3 2.4S6.5 15 8 15s1.5 2.4 3 2.4S12.5 15 14 15s1.5 2.4 3 2.4S18.5 15 20 15s1.5 2.4 2 2.4"/>
+            </symbol>
+            <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6,9 12,15 18,9"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <div class="mesh-bg" id="meshBg"></div>
+    <div class="grain"></div>
+
+    <!-- CORRIENTES DE VIENTO -->
+    <div class="wind-layer" aria-hidden="true">
+        <svg viewBox="0 0 1400 900" preserveAspectRatio="none">
+            <path class="wind-line w1" d="M-100,120 C 200,60 400,180 700,110 S 1200,40 1500,130" stroke-dasharray="10 22" />
+            <path class="wind-line w2" d="M-150,260 C 150,320 450,190 750,270 S 1250,340 1550,240" stroke-dasharray="4 16" />
+            <path class="wind-line w3" d="M-120,420 C 220,370 480,470 760,400 S 1220,340 1520,430" stroke-dasharray="14 26" />
+            <path class="wind-line w4" d="M-100,560 C 250,610 500,510 780,580 S 1260,650 1560,540" stroke-dasharray="6 18" />
+            <path class="wind-line w5" d="M-150,700 C 180,650 460,760 740,690 S 1240,610 1540,710" stroke-dasharray="18 30" />
+            <path class="wind-line w6" d="M-120,820 C 200,860 480,780 760,830 S 1260,880 1560,800" stroke-dasharray="3 14" />
+        </svg>
+    </div>
+
+    <!-- ============================== -->
+    <!-- NAV STICKY + PROGRESO           -->
+    <!-- ============================== -->
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="#top" class="nav-brand">
+                <svg width="16" height="16"><use href="#i-leaf"/></svg>
+                <strong>RAS · III</strong>
+                <span style="opacity:.6">Recursos Socioemocionales</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#proposito" data-section="proposito">Propósito</a></li>
+                <li><a href="#modulos" data-section="modulos">Módulos</a></li>
+                <li><a href="#evaluacion" data-section="evaluacion">Evaluación</a></li>
+                <li><a href="#laboratorios" data-section="laboratorios">Laboratorios</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <!-- ============================== -->
+    <!-- SOL INTERACTIVO (SVG)          -->
+    <!-- ============================== -->
+    <div class="sun-container" id="sunContainer">
+        <button class="sun" id="sun" aria-label="Cambiar la intensidad de la luz de la página">
+            <svg viewBox="0 0 200 200" aria-hidden="true">
+                <defs>
+                    <radialGradient id="sunCore" cx="42%" cy="36%" r="62%">
+                        <stop offset="0%" stop-color="#fffbe0"/>
+                        <stop offset="40%" stop-color="#ffe873"/>
+                        <stop offset="72%" stop-color="#f0b429"/>
+                        <stop offset="100%" stop-color="#d17d0a"/>
+                    </radialGradient>
+                    <radialGradient id="sunHalo" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ffe873" stop-opacity="0.5"/>
+                        <stop offset="100%" stop-color="#ffe873" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+
+                <circle class="sun-core-pulse" cx="100" cy="100" r="92" fill="url(#sunHalo)"/>
+
+                <g class="sun-rays" stroke="#ffe873" stroke-linecap="round">
+                    <g opacity="0.85">
+                        <line x1="100" y1="6"  x2="100" y2="30" stroke-width="5"/>
+                        <line x1="100" y1="170" x2="100" y2="194" stroke-width="5"/>
+                        <line x1="6" y1="100" x2="30" y2="100" stroke-width="5"/>
+                        <line x1="170" y1="100" x2="194" y2="100" stroke-width="5"/>
+                    </g>
+                    <g opacity="0.6">
+                        <line x1="35" y1="35" x2="52" y2="52" stroke-width="4"/>
+                        <line x1="165" y1="35" x2="148" y2="52" stroke-width="4"/>
+                        <line x1="35" y1="165" x2="52" y2="148" stroke-width="4"/>
+                        <line x1="165" y1="165" x2="148" y2="148" stroke-width="4"/>
+                    </g>
+                    <g opacity="0.4">
+                        <line x1="66" y1="14" x2="74" y2="34" stroke-width="3"/>
+                        <line x1="134" y1="14" x2="126" y2="34" stroke-width="3"/>
+                        <line x1="66" y1="186" x2="74" y2="166" stroke-width="3"/>
+                        <line x1="134" y1="186" x2="126" y2="166" stroke-width="3"/>
+                        <line x1="14" y1="66" x2="34" y2="74" stroke-width="3"/>
+                        <line x1="14" y1="134" x2="34" y2="126" stroke-width="3"/>
+                        <line x1="186" y1="66" x2="166" y2="74" stroke-width="3"/>
+                        <line x1="186" y1="134" x2="166" y2="126" stroke-width="3"/>
+                    </g>
+                </g>
+
+                <circle cx="100" cy="100" r="58" fill="url(#sunCore)"/>
+                <circle cx="100" cy="100" r="58" fill="none" stroke="#fff7c2" stroke-width="1" opacity="0.5"/>
+                <ellipse cx="82" cy="80" rx="18" ry="11" fill="#fffef2" opacity="0.35"/>
+            </svg>
+        </button>
+        <span class="sun-caption" id="sunCaption">Amanecer</span>
+    </div>
+
+    <!-- ============================== -->
+    <!-- PLANTA CRECIENDO (SVG)         -->
+    <!-- ============================== -->
+    <div class="plant-container" id="plantContainer" aria-hidden="true">
+        <svg viewBox="0 0 150 220" id="plant">
+            <defs>
+                <linearGradient id="stemGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#2f6b41"/>
+                    <stop offset="100%" stop-color="#6fc78a"/>
+                </linearGradient>
+                <linearGradient id="leafGradientA" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7cd694"/>
+                    <stop offset="100%" stop-color="#2f8a55"/>
+                </linearGradient>
+                <linearGradient id="leafGradientB" x1="1" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4dd0b0"/>
+                    <stop offset="100%" stop-color="#22795c"/>
+                </linearGradient>
+                <radialGradient id="potGradient" cx="30%" cy="20%" r="90%">
+                    <stop offset="0%" stop-color="#8d6e63"/>
+                    <stop offset="100%" stop-color="#5d4232"/>
+                </radialGradient>
+            </defs>
+
+            <!-- maceta -->
+            <path d="M52,205 L98,205 L92,218 Q75,224 58,218 Z" fill="url(#potGradient)"/>
+            <rect x="50" y="198" width="50" height="10" rx="4" fill="#a1887f"/>
+            <ellipse cx="75" cy="200" rx="21" ry="5" fill="#3e2723"/>
+
+            <!-- tallo (se dibuja con stroke-dashoffset al hacer scroll) -->
+            <path id="stem" class="plant-stem" pathLength="210"
+                  d="M75,205 C 70,175 82,150 74,120 C 66,92 80,68 75,38" />
+
+            <!-- hojas: formas orgánicas tipo hoja con nervadura -->
+            <g id="leaf1" class="leaf leaf-1" style="transform-origin: 70px 175px;">
+                <path d="M70,175 C 40,168 20,148 14,120 C 46,122 68,140 74,168 Z" fill="url(#leafGradientA)"/>
+                <path d="M70,175 C 50,165 30,150 16,124" fill="none" stroke="#1f5c3a" stroke-width="1.1" opacity="0.5"/>
+            </g>
+            <g id="leaf2" class="leaf leaf-2" style="transform-origin: 78px 150px;">
+                <path d="M78,150 C 108,140 126,116 130,88 C 100,94 80,114 76,144 Z" fill="url(#leafGradientB)"/>
+                <path d="M78,150 C 98,138 116,120 128,92" fill="none" stroke="#1f5c3a" stroke-width="1.1" opacity="0.5"/>
+            </g>
+            <g id="leaf3" class="leaf leaf-3" style="transform-origin: 68px 118px;">
+                <path d="M68,118 C 42,110 26,90 22,64 C 50,68 68,86 72,112 Z" fill="url(#leafGradientA)"/>
+                <path d="M68,118 C 50,106 34,92 24,68" fill="none" stroke="#1f5c3a" stroke-width="1" opacity="0.5"/>
+            </g>
+            <g id="leaf4" class="leaf leaf-4" style="transform-origin: 78px 90px;">
+                <path d="M78,90 C 102,82 116,62 118,38 C 92,42 76,60 74,86 Z" fill="url(#leafGradientB)"/>
+                <path d="M78,90 C 94,78 108,64 116,42" fill="none" stroke="#1f5c3a" stroke-width="1" opacity="0.5"/>
+            </g>
+            <g id="leaf5" class="leaf leaf-5" style="transform-origin: 72px 62px;">
+                <path d="M72,62 C 50,54 36,38 32,16 C 56,20 72,36 76,58 Z" fill="url(#leafGradientA)"/>
+            </g>
+
+            <!-- capullo dorado: florece al completar el scroll -->
+            <g id="bud" class="bud" style="transform-origin: 75px 36px;">
+                <circle cx="75" cy="34" r="8" fill="#f0c93e"/>
+                <circle cx="75" cy="34" r="8" fill="none" stroke="#fff2c2" stroke-width="1" opacity="0.6"/>
+                <circle cx="70" cy="29" r="3.4" fill="#ffe873"/>
+                <circle cx="80" cy="29" r="3.4" fill="#ffe873"/>
+                <circle cx="75" cy="26" r="3.4" fill="#fff2c2"/>
+            </g>
+        </svg>
+    </div>
+
+    <!-- ============================== -->
+    <!-- SCROLL HINT                    -->
+    <!-- ============================== -->
+    <div class="scroll-hint" id="scrollHint">
+        <span>Desplázate para crecer</span>
+        <svg width="16" height="16"><use href="#i-chevron"/></svg>
+    </div>
+
+    <!-- ============================== -->
+    <!-- CONTENIDO                      -->
+    <!-- ============================== -->
+    <div class="container" id="top">
+
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-inner">
+                <div class="header-left">
+                    <h1>Recursos y <span class="highlight">Ámbitos</span><br />Socioemocionales <span class="highlight">III</span></h1>
+                    <div class="sub">Tercer Semestre · Modalidad Escolarizada con mediación tecnológica</div>
+                </div>
+                <div class="header-badge">
+                    <svg width="15" height="15"><use href="#i-leaf"/></svg>
+                    Bienestar y autocuidado
+                </div>
+            </div>
+
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <span class="label">Horas</span>
+                    <span class="value">1 semanal (1 práctica)</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">Créditos</span>
+                    <span class="value">1</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">Carácter</span>
+                    <span class="value">Obligatoria</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">Fase</span>
+                    <span class="value">Transición</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- PROPÓSITO -->
+        <section class="section" id="proposito">
+            <div class="section-title">
+                <span class="bar gold"></span>
+                Propósito de la Asignatura
+            </div>
+            <div class="surface card">
+                <p>
+                    Promover acciones de <strong class="highlight-teal">autocuidado y de prevención</strong>
+                    para el bienestar físico, emocional y social, a través de estrategias que favorezcan la
+                    adquisición de <strong class="highlight-gold">hábitos de vida saludable</strong>, que generen
+                    impacto en su persona y en las relaciones con los demás.
+                </p>
+            </div>
+        </section>
+
+        <!-- MÓDULOS -->
+        <section class="section" id="modulos">
+            <div class="section-title">
+                <span class="bar green"></span>
+                Contenidos por Módulo
+            </div>
+            <div class="mod-grid">
+                <div class="surface mod-card">
+                    <span class="icon"><svg width="19" height="19"><use href="#i-smartphone"/></svg></span>
+                    <h4>Módulo I · Hábitos Digitales Conscientes</h4>
+                    <p>Análisis del uso responsable de medios digitales y su influencia en la autoestima y relaciones sociales.</p>
+                </div>
+                <div class="surface mod-card">
+                    <span class="icon"><svg width="19" height="19"><use href="#i-pulse"/></svg></span>
+                    <h4>Módulo II · Aprendiendo a manejar el estrés</h4>
+                    <p>Identificación de situaciones que provocan estrés y aplicación de estrategias para un manejo adecuado.</p>
+                </div>
+                <div class="surface mod-card">
+                    <span class="icon"><svg width="19" height="19"><use href="#i-shield"/></svg></span>
+                    <h4>Módulo III · Factores de riesgo y protección</h4>
+                    <p>Reflexión sobre factores de riesgo y protección asociados al consumo de sustancias nocivas.</p>
+                </div>
+                <div class="surface mod-card">
+                    <span class="icon"><svg width="19" height="19"><use href="#i-eye"/></svg></span>
+                    <h4>Módulo IV · Protege tus sentidos</h4>
+                    <p>Aplicación de estrategias preventivas para el cuidado de la visión y audición.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- EVALUACIÓN -->
+        <section class="section" id="evaluacion">
+            <div class="section-title">
+                <span class="bar coral"></span>
+                Sistema de Evaluación
+            </div>
+            <div class="eval-grid">
+
+                <div class="surface eval-card tier-mint">
+                    <h4><svg width="16" height="16"><use href="#i-book"/></svg> Primer y Segundo Parcial</h4>
+                    <ul>
+                        <li>Portafolio de evidencias <strong style="color:#fff;">80%</strong></li>
+                        <li>Formativa PAEC <strong style="color:#fff;">20%</strong></li>
+                        <li>Examen Parcial <strong style="color: var(--text-muted);">N/A</strong></li>
+                    </ul>
+                </div>
+
+                <div class="surface eval-card tier-gold">
+                    <h4><svg width="16" height="16"><use href="#i-book"/></svg> Ordinario Final</h4>
+                    <ul>
+                        <li>Portafolio <strong style="color:#fff;">100%</strong></li>
+                    </ul>
+                    <div class="note">
+                        El alumno podrá exentar la valoración ordinaria final con un promedio mayor o igual a <strong>8.0</strong> puntos en las valoraciones parciales.
+                    </div>
+                </div>
+
+                <div class="surface eval-card tier-coral">
+                    <h4><svg width="16" height="16"><use href="#i-book"/></svg> Extraordinaria y Título de Suficiencia</h4>
+                    <ul>
+                        <li>Portafolio <strong style="color:#fff;">100%</strong></li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- INSTRUCCIONES -->
+        <section class="section" id="instrucciones">
+            <div class="section-title">
+                <span class="bar mint"></span>
+                Instrucciones para los alumnos
+            </div>
+            <div class="instructions-box">
+                <h4><svg width="16" height="16"><use href="#i-clipboard"/></svg> Antes de comenzar</h4>
+                <ul>
+                    <li><strong>Un solo intento:</strong> Cada laboratorio se realiza una sola vez. La calificación obtenida será definitiva.</li>
+                    <li><strong>Captura de pantalla:</strong> Al finalizar cada laboratorio, toma una <strong>captura de pantalla</strong> del certificado o resultado final.</li>
+                    <li><strong>Entrega en Teams:</strong> Sube tu captura en la tarea correspondiente de Microsoft Teams.</li>
+                    <li><strong>Recomendación:</strong> Utiliza una <strong>computadora</strong> para una mejor experiencia.</li>
+                    <li><strong>Seriedad:</strong> Las respuestas deben ser auténticas y con un lenguaje apropiado para un ejercicio académico.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- LABORATORIOS -->
+        <section class="section" id="laboratorios">
+            <div class="section-title">
+                <span class="bar gold"></span>
+                Laboratorios Interactivos
+            </div>
+            <p style="font-size: 0.98rem; color: var(--text-muted); margin-bottom: 22px;">
+                Completa cada laboratorio, toma captura de pantalla del resultado final y súbelo a Teams.
+            </p>
+
+            <div class="lab-grid">
+
+                <a href="laboratorio_detox_digital(v).html" class="surface lab-card">
+                    <span class="lab-icon"><svg width="18" height="18"><use href="#i-leaf"/></svg></span>
+                    <div class="lab-title">Detox Digital</div>
+                    <div class="lab-desc">Jerarquización de estrategias y hábitos para un uso equilibrado de la tecnología.</div>
+                    <span class="lab-module m1">Módulo I</span>
+                </a>
+
+                <a href="Tabla%20de%20daños%20relacionados%20al%20uso%20de%20la%20tecnología.html" class="surface lab-card">
+                    <span class="lab-icon"><svg width="18" height="18"><use href="#i-alert"/></svg></span>
+                    <div class="lab-title">Tabla de daños tecnológicos</div>
+                    <div class="lab-desc">Clasificación de daños físicos, psicológicos y sociales por uso excesivo de tecnología.</div>
+                    <span class="lab-module m1">Módulo I</span>
+                </a>
+
+                <a href="Pulpo%20La%20textura%20de%20mis%20emociones.html" class="surface lab-card">
+                    <span class="lab-icon"><svg width="18" height="18"><use href="#i-waves"/></svg></span>
+                    <div class="lab-title">Pulpo: La textura de mis emociones</div>
+                    <div class="lab-desc">Identificación de estresores y estrategias de manejo emocional.</div>
+                    <span class="lab-module m2">Módulo II</span>
+                </a>
+
+                <a href="Mapa%20Digital%20Gestionando%20mi%20estrés.html" class="surface lab-card">
+                    <span class="lab-icon"><svg width="18" height="18"><use href="#i-map"/></svg></span>
+                    <div class="lab-title">Mapa Digital: Gestionando mi estrés</div>
+                    <div class="lab-desc">Ordenamiento de pasos de técnicas anti-estrés con calificación automática.</div>
+                    <span class="lab-module m2">Módulo II</span>
+                </a>
+
+                <div class="surface lab-card disabled">
+                    <span class="lab-icon"><svg width="18" height="18"><use href="#i-shield"/></svg></span>
+                    <div class="lab-title">Factores de riesgo y protección</div>
+                    <div class="lab-desc">Laboratorio en desarrollo para el Módulo III.</div>
+                    <span class="lab-module m3">Módulo III · Próximamente</span>
+                </div>
+
+                <div class="surface lab-card disabled">
+                    <span class="lab-icon"><svg width="18" height="18"><use href="#i-eye"/></svg></span>
+                    <div class="lab-title">Protege tus sentidos</div>
+                    <div class="lab-desc">Laboratorio en desarrollo para el Módulo IV.</div>
+                    <span class="lab-module m4">Módulo IV · Próximamente</span>
+                </div>
+
+            </div>
+
+            <p style="font-size: 0.82rem; color: var(--text-dim); margin-top: 22px; text-align: center; border-top: 1px solid var(--line-soft); padding-top: 20px;">
+                Los laboratorios de los Módulos III y IV estarán disponibles próximamente.
+            </p>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <div class="name">M. en Doc. Adriel López Sánchez</div>
+            <div class="title-role">Docente · Recursos y Ámbitos Socioemocionales III</div>
+            <div class="copy">ACADEMIA DE RECURSOS Y ÁMBITOS SOCIOEMOCIONALES · TERCER SEMESTRE</div>
+        </footer>
+
+    </div>
+
+    <!-- ============================== -->
+    <!-- JAVASCRIPT                     -->
+    <!-- ============================== -->
+    <script>
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // ==========================================
+        // PLANTA: CRECE CON EL SCROLL
+        // ==========================================
+        const stem = document.getElementById('stem');
+        const leaves = [document.getElementById('leaf1'), document.getElementById('leaf2'), document.getElementById('leaf3'), document.getElementById('leaf4'), document.getElementById('leaf5')];
+        const bud = document.getElementById('bud');
+        const plantContainer = document.getElementById('plantContainer');
+        const scrollHint = document.getElementById('scrollHint');
+        const progressFill = document.getElementById('progressFill');
+        const plantEl = document.getElementById('plant');
+
+        function onScroll() {
+            const scrollY = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = Math.min(Math.max(scrollY / maxScroll, 0), 1);
+
+            progressFill.style.width = (progress * 100) + '%';
+
+            if (progress > 0.04) {
+                stem.classList.add('grown');
+                leaves.forEach((leaf, index) => {
+                    const threshold = 0.06 + (index * 0.06);
+                    if (progress > threshold) leaf.classList.add('show');
+                    else leaf.classList.remove('show');
+                });
+                bud.classList.toggle('bloom', progress > 0.92);
+                scrollHint.style.opacity = Math.max(0, 0.55 - progress * 1.8);
+            } else {
+                stem.classList.remove('grown');
+                leaves.forEach(leaf => leaf.classList.remove('show'));
+                bud.classList.remove('bloom');
+                scrollHint.style.opacity = 0.55;
+            }
+
+            if (!reduceMotion) {
+                const sway = Math.sin(scrollY / 260) * 2.5;
+                plantEl.style.transform = `rotate(${sway}deg)`;
+                plantEl.style.transformBox = 'view-box';
+                plantEl.style.transformOrigin = '75px 210px';
+            }
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('load', onScroll);
+
+        // ==========================================
+        // SOL: CAMBIA LA INTENSIDAD Y EL COLOR
+        // ==========================================
+        const sun = document.getElementById('sun');
+        const sunCaption = document.getElementById('sunCaption');
+        const meshBg = document.getElementById('meshBg');
+        let intensityLevel = 0;
+        const intensityMap = [
+            { bg: '#0a2e1f', glow: '0.4', scale: 1,     label: 'Amanecer' },
+            { bg: '#144a30', glow: '0.55', scale: 1.08, label: 'Mañana' },
+            { bg: '#206640', glow: '0.7', scale: 1.16,  label: 'Mediodía' },
+            { bg: '#2f8a55', glow: '0.9', scale: 1.26,  label: 'Pleno sol' }
+        ];
+
+        sun.addEventListener('click', function() {
+            intensityLevel = (intensityLevel + 1) % intensityMap.length;
+            const level = intensityMap[intensityLevel];
+
+            document.body.style.background = level.bg;
+            meshBg.style.opacity = 0.45 + (intensityLevel * 0.06);
+
+            sun.style.transform = `scale(${level.scale})`;
+            sun.style.filter = `drop-shadow(0 0 ${46 * (1 + intensityLevel * 0.3)}px rgba(245,215,66,${level.glow})) drop-shadow(0 0 90px rgba(245,215,66,0.2))`;
+
+            sunCaption.textContent = level.label;
+            sun.setAttribute('aria-label', 'Intensidad de luz: ' + level.label + '. Clic para cambiar.');
+        });
+
+        if (!reduceMotion) {
+            setInterval(() => {
+                if (!document.hidden) {
+                    const glow = document.querySelector('.sun-glow');
+                    if (glow) glow.style.transform = 'scale(' + (1 + Math.random() * 0.05) + ')';
+                }
+            }, 3000);
+        }
+
+        // ==========================================
+        // REVELADO DE SECCIONES AL HACER SCROLL
+        // ==========================================
+        const sections = document.querySelectorAll('.section');
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+            sections.forEach(s => revealObserver.observe(s));
+        } else {
+            sections.forEach(s => s.classList.add('in-view'));
+        }
+
+        // ==========================================
+        // SCROLLSPY DE NAVEGACIÓN
+        // ==========================================
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const spySections = document.querySelectorAll('[id="proposito"],[id="modulos"],[id="evaluacion"],[id="laboratorios"]');
+
+        if ('IntersectionObserver' in window && navLinks.length) {
+            const spyObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => link.classList.remove('active'));
+                        const active = document.querySelector(`.nav-links a[data-section="${entry.target.id}"]`);
+                        if (active) active.classList.add('active');
+                    }
+                });
+            }, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+            spySections.forEach(s => spyObserver.observe(s));
+        }
+
+        // ==========================================
+        // RESPONSIVE: AJUSTAR TAMAÑO DE LA PLANTA
+        // ==========================================
+        function adjustPlantSize() {
+            if (window.innerWidth < 900) {
+                plantContainer.style.display = 'none';
+            } else {
+                plantContainer.style.display = 'block';
+            }
+        }
+
+        window.addEventListener('resize', adjustPlantSize);
+        window.addEventListener('load', adjustPlantSize);
+    </script>
+
+</body>
+</html>
