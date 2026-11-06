@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ojos y Oídos al 100 · Salud Sensorial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-start: #0f0c29;
+            --bg-mid: #302b63;
+            --bg-end: #24243e;
+            --risk: #FF3B5C;
+            --prevent: #FFD93D;
+            --protect: #06D6A0;
+            --cyan: #00D9FF;
+            --purple: #B14AED;
+            --text: #F8F9FA;
+            --muted: #a0a8c0;
+            --panel: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.12);
+
+            --q1: #FF3B5C;
+            --q2: #FFD93D;
+            --q3: #06D6A0;
+            --q4: #B14AED;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255, 59, 92, 0.15), transparent 40%),
+                radial-gradient(circle at 85% 30%, rgba(255, 217, 61, 0.12), transparent 40%),
+                radial-gradient(circle at 50% 90%, rgba(6, 214, 160, 0.15), transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(177, 74, 237, 0.12), transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+            animation: bgFloat 20s ease-in-out infinite alternate;
+        }
+        @keyframes bgFloat {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.1) rotate(3deg); }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 90px;
+        }
+
+        .glass-panel {
+            background: var(--panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #0a0a14;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.4);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .hud {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(15,12,41,0.95), transparent);
+        }
+        .hud-item {
+            pointer-events: auto;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 6px 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .hud-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .hud-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stepper {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            padding: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .stepper-item {
+            flex: 1;
+            min-width: 70px;
+            padding: 10px 8px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            user-select: none;
+        }
+        .stepper-item.active {
+            color: #0a0a14;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
+        }
+        .stepper-item.done {
+            color: var(--protect);
+            border-color: var(--protect);
+            background: rgba(6, 214, 160, 0.1);
+        }
+        .stepper-item .num {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .quadrant-active {
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid;
+            margin-bottom: 16px;
+            background: rgba(0,0,0,0.35);
+        }
+        .quadrant-active.q0 { border-color: var(--q1); }
+        .quadrant-active.q1 { border-color: var(--q2); }
+        .quadrant-active.q2 { border-color: var(--q3); }
+        .quadrant-active.q3 { border-color: var(--q4); }
+
+        .quadrant-title-main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+        .quadrant-num-big {
+            background: rgba(0,0,0,0.5);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 900;
+            flex-shrink: 0;
+        }
+        .quadrant-active.q0 .quadrant-num-big { color: var(--q1); border: 2px solid var(--q1); }
+        .quadrant-active.q1 .quadrant-num-big { color: var(--q2); border: 2px solid var(--q2); }
+        .quadrant-active.q2 .quadrant-num-big { color: var(--q3); border: 2px solid var(--q3); }
+        .quadrant-active.q3 .quadrant-num-big { color: var(--q4); border: 2px solid var(--q4); }
+
+        .quadrant-name {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .quadrant-active.q0 .quadrant-name { color: var(--q1); }
+        .quadrant-active.q1 .quadrant-name { color: var(--q2); }
+        .quadrant-active.q2 .quadrant-name { color: var(--q3); }
+        .quadrant-active.q3 .quadrant-name { color: var(--q4); }
+
+        .quadrant-instruct {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 14px;
+            margin-top: 8px;
+        }
+
+        .selected-zone {
+            background: rgba(0,0,0,0.3);
+            border: 2px dashed rgba(255,255,255,0.15);
+            border-radius: 14px;
+            padding: 12px;
+            min-height: 100px;
+            margin-bottom: 16px;
+        }
+        .selected-zone-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .selected-zone-counter {
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(0,0,0,0.4);
+            font-weight: 700;
+            color: var(--text);
+        }
+        .selected-zone-counter.complete {
+            background: rgba(6, 214, 160, 0.25);
+            color: var(--protect);
+        }
+        .selected-chips {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .selected-chip {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e0e8e2;
+            border-left: 4px solid;
+            animation: chipIn 0.3s ease;
+        }
+        .quadrant-active.q0 .selected-chip { border-left-color: var(--q1); }
+        .quadrant-active.q1 .selected-chip { border-left-color: var(--q2); }
+        .quadrant-active.q2 .selected-chip { border-left-color: var(--q3); }
+        @keyframes chipIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .selected-chip .chip-text {
+            flex: 1;
+            font-weight: 500;
+        }
+        .selected-chip .chip-remove {
+            background: rgba(255,59,92,0.2);
+            border: 1px solid rgba(255,59,92,0.4);
+            color: #ff8ba0;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .selected-chip .chip-remove:hover {
+            background: rgba(255,59,92,0.5);
+            color: #fff;
+        }
+        .selected-empty {
+            text-align: center;
+            padding: 24px 10px;
+            color: rgba(255,255,255,0.25);
+            font-size: 12px;
+            font-style: italic;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .bank-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 14px;
+            padding: 12px;
+            border: 1px solid var(--border);
+        }
+        .bank-header-small {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--muted);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .bank-grid-mobile {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        @media (min-width: 640px) {
+            .bank-grid-mobile { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .bank-card-mobile {
+            background: rgba(255,255,255,0.06);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e0e8e2;
+            font-weight: 500;
+            user-select: none;
+        }
+        .bank-card-mobile:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(0, 217, 255, 0.5);
+            transform: translateY(-1px);
+        }
+        .bank-card-mobile:active {
+            transform: scale(0.98);
+        }
+        .bank-card-mobile .icon-badge {
+            flex-shrink: 0;
+            font-size: 14px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+        }
+        .bank-card-mobile .icon-badge.vision { color: var(--cyan); }
+        .bank-card-mobile .icon-badge.audicion { color: var(--prevent); }
+
+        .bank-empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 20px;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .commitment-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .commitment-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e0e8e2;
+            font-weight: 500;
+        }
+        .commitment-item:hover:not(.disabled) {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(177, 74, 237, 0.5);
+        }
+        .commitment-item.selected {
+            background: rgba(177, 74, 237, 0.2);
+            border-color: var(--q4);
+            box-shadow: 0 0 15px rgba(177, 74, 237, 0.3);
+        }
+        .commitment-item.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .commitment-check {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+            transition: all 0.2s;
+            margin-top: 1px;
+        }
+        .commitment-item.selected .commitment-check {
+            background: var(--q4);
+            border-color: var(--q4);
+            color: #fff;
+        }
+
+        .nav-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid;
+        }
+        .nav-btn.prev {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--muted);
+        }
+        .nav-btn.prev:hover:not(:disabled) {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            background: rgba(0, 217, 255, 0.05);
+        }
+        .nav-btn.prev:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .nav-btn.next {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-color: transparent;
+            color: #0a0a14;
+        }
+        .nav-btn.next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+        .nav-btn.next:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .nav-btn.finish {
+            background: linear-gradient(135deg, var(--protect), var(--cyan));
+            border-color: transparent;
+            color: #0a0a14;
+        }
+
+        .toast {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #0a0a14;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 12px 40px rgba(0, 217, 255, 0.5);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error {
+            background: linear-gradient(135deg, #FF3B5C, #B14AED);
+            color: #fff;
+        }
+
+        .loader-ring {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(0, 217, 255, 0.15);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .pulse { animation: pulseAnim 1.5s ease-in-out infinite; }
+        @keyframes pulseAnim {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hidden-step { display: none !important; }
+
+        #btnHome, #btnCapture {
+            position: fixed;
+            bottom: 24px;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #btnCapture {
+            left: 24px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-weight: 700;
+        }
+        #btnCapture:hover {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: var(--cyan);
+        }
+        #btnHome {
+            right: 24px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #0a0a14;
+            font-weight: 800;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.4);
+        }
+        #btnHome:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 50px rgba(0, 217, 255, 0.6);
+        }
+
+        .input-modern {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+            outline: none;
+        }
+        .input-modern:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 24px rgba(0, 217, 255, 0.2);
+            background: rgba(0, 217, 255, 0.05);
+        }
+        .input-modern::placeholder { color: rgba(255,255,255,0.3); }
+
+        /* ============ CALIFICACIÓN GIGANTE ============ */
+        .big-grade {
+            font-size: clamp(7rem, 28vw, 14rem);
+            font-weight: 900;
+            font-family: 'Poppins', sans-serif;
+            line-height: 0.85;
+            background: linear-gradient(135deg, var(--risk), var(--prevent), var(--protect));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 6px 30px rgba(255, 217, 61, 0.5));
+            letter-spacing: -0.05em;
+        }
+
+        /* ============ CUADRANTE FINAL 2x2 ============ */
+        .final-quadrants-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 16px;
+            border: 2px solid var(--border);
+        }
+        @media (max-width: 640px) {
+            .final-quadrants-grid { gap: 8px; padding: 8px; }
+        }
+
+        .final-quadrant {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 2px solid;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 220px;
+        }
+        .final-quadrant.q1 { border-color: var(--q1); }
+        .final-quadrant.q2 { border-color: var(--q2); }
+        .final-quadrant.q3 { border-color: var(--q3); }
+        .final-quadrant.q4 { border-color: var(--q4); }
+
+        .fq-header {
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .fq-header .num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.5);
+        }
+        .fq-header .title-text {
+            flex: 1;
+            line-height: 1.15;
+        }
+        .fq-header .score-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+        .final-quadrant.q1 .fq-header { background: linear-gradient(90deg, rgba(255,59,92,0.25), transparent); color: var(--q1); }
+        .final-quadrant.q2 .fq-header { background: linear-gradient(90deg, rgba(255,217,61,0.25), transparent); color: var(--q2); }
+        .final-quadrant.q3 .fq-header { background: linear-gradient(90deg, rgba(6,214,160,0.25), transparent); color: var(--q3); }
+        .final-quadrant.q4 .fq-header { background: linear-gradient(90deg, rgba(177,74,237,0.25), transparent); color: var(--q4); }
+
+        .fq-body {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .fq-item {
+            font-size: 9px;
+            line-height: 1.3;
+            padding: 5px 6px;
+            border-radius: 5px;
+            display: flex;
+            gap: 5px;
+            align-items: flex-start;
+        }
+        .fq-item.ok { background: rgba(6, 214, 160, 0.1); }
+        .fq-item.bad { background: rgba(255, 59, 92, 0.12); }
+        .fq-item .icon { flex-shrink: 0; font-size: 10px; }
+        .fq-item .txt { flex: 1; color: #d0d8e0; }
+        .fq-item .note {
+            display: block;
+            font-size: 8px;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        .criteria-row {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--cyan);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .criteria-row.ok { border-left-color: var(--protect); }
+        .criteria-row.warn { border-left-color: var(--prevent); }
+        .criteria-row.bad { border-left-color: var(--risk); }
+
+        .capture-card {
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        }
+
+        @media (max-width: 640px) {
+            .hud-item { padding: 5px 10px; font-size: 10px; }
+            .capture-card { padding: 14px; }
+            #btnCapture, #btnHome { padding: 10px 14px; font-size: 10px; }
+            .app-container { padding-bottom: 80px; }
+            .final-quadrant { min-height: 180px; }
+            .big-grade { font-size: clamp(6rem, 32vw, 10rem); }
+        }
+
+        @media print {
+            body { background: white !important; }
+            body::before, body::after { display: none !important; }
+            .no-print { display: none !important; }
+            .capture-card { background: white !important; border: 2px solid #000 !important; color: #000 !important; box-shadow: none !important; }
+        }
+
+        .no-copy { user-select: none; -webkit-user-select: none; }
+        .no-copy input, .no-copy textarea { user-select: text; -webkit-user-select: text; }
+    </style>
+</head>
+<body class="no-copy">
+
+<script>
+    document.addEventListener('copy', e => { e.preventDefault(); });
+    document.addEventListener('paste', e => { e.preventDefault(); });
+    document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+
+<div id="toast" class="toast">✔</div>
+
+<div id="hud" class="hud hidden-step no-print">
+    <div class="hud-item">
+        <span class="hud-label">JUGADOR</span>
+        <span class="hud-value" id="hud-name">---</span>
+    </div>
+    <div class="hud-item" style="text-align:right;">
+        <span class="hud-label">CUADRANTE · TIEMPO</span>
+        <span class="hud-value"><span id="hud-q">0/4</span> · <span id="hud-time">00:00</span></span>
+    </div>
+</div>
+
+<button id="btnCapture" class="hidden-step no-print" onclick="takeScreenshot()">📸 CAPTURAR</button>
+<a id="btnHome" href="index.html" class="hidden-step no-print">🏠 VOLVER A CASA</a>
+
+<div class="app-container">
+    <div class="max-w-4xl mx-auto">
+
+        <!-- ==================== STEP 0: REGISTRO ==================== -->
+        <section id="step-0" class="fade-in pt-16">
+            <div class="glass-panel p-6 md:p-10">
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-3 pulse">👁️🎧</div>
+                    <h1 class="text-2xl md:text-4xl font-black mb-2" style="background: linear-gradient(135deg, #FF3B5C, #FFD93D, #06D6A0, #B14AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Ojos y Oídos al 100
+                    </h1>
+                    <p class="text-[var(--muted)] text-sm font-semibold">Laboratorio Interactivo de Salud Sensorial</p>
+                    <p class="text-[var(--muted)] text-xs mt-1 font-mono">Módulo IV · Protege tus sentidos</p>
+                </div>
+
+                <div class="bg-[#00D9FF]/10 border-2 border-[#00D9FF]/30 rounded-2xl p-5 mb-4">
+                    <h3 class="font-black text-[#00D9FF] text-sm uppercase tracking-widest mb-3">⚡ INSTRUCCIONES</h3>
+                    <ul class="text-sm text-gray-300 space-y-2 list-disc pl-5">
+                        <li>Construirás un <strong>cuadrante de 4 recuadros</strong> (como partir una hoja en 4).</li>
+                        <li>Cada cuadrante se completa <strong>en una pantalla diferente</strong> (paso a paso).</li>
+                        <li>De las tarjetas disponibles, selecciona <strong>6 por cuadrante</strong> (algunas quedarán sin usar, ¡presta atención!).</li>
+                        <li>En el <strong>Cuadrante 4</strong> elegirás <strong>5 compromisos</strong> de autocuidado (obligatorio, pero <strong>no suma calificación</strong>).</li>
+                        <li>Puedes navegar con <strong>← Anterior</strong> para revisar o corregir.</li>
+                        <li>Solo tienes <strong>un intento</strong>. Al final podrás <strong>capturar el cuadrante final</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-[#B14AED]/10 border-2 border-[#B14AED]/30 rounded-2xl p-5 mb-6">
+                    <h3 class="font-black text-[#B14AED] text-sm uppercase tracking-widest mb-3">🎯 EVALUACIÓN (10 PTS)</h3>
+                    <div class="text-sm text-gray-300 space-y-1">
+                        <p>• <strong>18 tarjetas clasificadas</strong> (6 por cuadrante en Q1, Q2 y Q3) → <strong>10 puntos máximo</strong></p>
+                        <p>• <strong>Los compromisos NO cuentan</strong> para la calificación, solo son obligatorios para finalizar</p>
+                        <p>• <strong>Tiempo:</strong> solo informativo</p>
+                    </div>
+                </div>
+
+                <div class="bg-black/30 border border-[var(--border)] rounded-2xl p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-[#00D9FF] uppercase tracking-widest mb-2">Nombre completo</label>
+                        <input type="text" id="in-name" class="input-modern" placeholder="Apellidos y nombres" oninput="checkLogin()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#00D9FF] uppercase tracking-widest mb-2">Grupo</label>
+                        <input type="text" id="in-group" class="input-modern" placeholder="Ej. 401" oninput="checkLogin()">
+                    </div>
+                    <button id="btn-start" onclick="startLab()" disabled class="btn-primary w-full py-4 text-base">
+                        👁️ INICIAR LABORATORIO
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== STEP 1: CUADRANTES ==================== -->
+        <section id="step-quadrant" class="hidden-step fade-in pt-16">
+            <div class="glass-panel p-4 md:p-6">
+                <div class="stepper no-print" id="stepper"></div>
+                <div id="quadrant-content"></div>
+            </div>
+        </section>
+
+        <!-- ==================== STEP 2: LOADING ==================== -->
+        <section id="step-loading" class="hidden-step fade-in pt-16">
+            <div class="glass-panel p-10 max-w-lg mx-auto text-center">
+                <div class="loader-ring mx-auto mb-6"></div>
+                <h2 class="text-2xl font-black mb-4">EVALUANDO TU CUADRANTE</h2>
+                <p class="text-[var(--muted)] text-sm mb-6">Analizando tus respuestas...</p>
+                <div class="text-left font-mono text-xs space-y-3 bg-black/30 p-4 rounded-xl">
+                    <p id="calc-1">[*] Verificando clasificaciones... <span class="text-[#00D9FF] animate-pulse">...</span></p>
+                    <p id="calc-2">[*] Contando aciertos... <span class="text-[#00D9FF] animate-pulse">...</span></p>
+                    <p id="calc-3">[*] Generando cuadrante final... <span class="text-[#00D9FF] animate-pulse">...</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== STEP 3: CERTIFICADO ==================== -->
+        <section id="step-3" class="hidden-step fade-in pt-16">
+            
+            <!-- ============ BOTONES PROMINENTES (NO SE CAPTURAN) ============ -->
+            <div class="no-print text-center mb-4 flex flex-wrap gap-3 justify-center">
+                <button onclick="takeScreenshot()" id="screenshotBtn" class="btn-primary py-4 px-8 text-base shadow-2xl" 
+                        style="box-shadow: 0 10px 40px rgba(0,217,255,0.5);">
+                    📸 CAPTURAR CUADRANTE
+                </button>
+                <button onclick="window.location.href='index.html'" class="py-4 px-6 text-base rounded-xl bg-white/10 border border-[var(--border)] text-white font-bold hover:bg-white/20 transition">
+                    🏠 VOLVER A CASA
+                </button>
+            </div>
+
+            <div id="capture-area" class="capture-card">
+                <div class="text-center border-b border-[var(--border)] pb-4 mb-4">
+                    <div class="text-4xl mb-2">👁️🎧</div>
+                    <h1 class="text-xl md:text-2xl font-black mb-1" style="background: linear-gradient(135deg, #FF3B5C, #FFD93D, #06D6A0, #B14AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Ojos y Oídos al 100
+                    </h1>
+                    <p class="text-[10px] text-[var(--muted)] font-mono uppercase tracking-widest">Cuadrante de Salud Sensorial · Producto Final</p>
+                </div>
+
+                <!-- Datos del estudiante -->
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <div class="bg-black/30 rounded-lg p-2 border border-[var(--border)]">
+                        <p class="text-[9px] text-[var(--muted)] uppercase tracking-widest font-bold mb-0.5">ESTUDIANTE</p>
+                        <p id="final-name" class="text-[11px] font-black text-white truncate"></p>
+                    </div>
+                    <div class="bg-black/30 rounded-lg p-2 border border-[var(--border)]">
+                        <p class="text-[9px] text-[var(--muted)] uppercase tracking-widest font-bold mb-0.5">GRUPO</p>
+                        <p id="final-group" class="text-[11px] font-black text-white"></p>
+                    </div>
+                    <div class="bg-black/30 rounded-lg p-2 border border-[var(--border)]">
+                        <p class="text-[9px] text-[var(--muted)] uppercase tracking-widest font-bold mb-0.5">TIEMPO</p>
+                        <p id="final-time" class="text-[11px] font-black text-[#00D9FF]"></p>
+                    </div>
+                </div>
+
+                <!-- CALIFICACIÓN GIGANTE -->
+                <div class="text-center mb-4 py-5 px-3 bg-gradient-to-br from-[#FF3B5C]/10 via-[#FFD93D]/10 to-[#06D6A0]/10 rounded-2xl border-2 border-[#FFD93D]/40">
+                    <p class="text-[11px] uppercase tracking-[4px] text-[#FFD93D] font-black mb-1">CALIFICACIÓN FINAL</p>
+                    <div class="big-grade" id="final-grade">0</div>
+                    <p class="text-xs text-[var(--muted)] font-mono font-bold mt-2">/ 10 PUNTOS</p>
+                </div>
+
+                <!-- CUADRANTE 2x2 -->
+                <div class="mb-4">
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-center text-[#00D9FF] mb-2">🗺️ CUADRANTE DE 4 RECUADROS</h3>
+                    <div class="final-quadrants-grid" id="final-quadrants"></div>
+                </div>
+
+                <div class="bg-black/30 rounded-2xl p-4 border border-[var(--border)] mb-4">
+                    <h3 class="text-[11px] font-black uppercase tracking-widest text-[#00D9FF] mb-2">💡 RETROALIMENTACIÓN</h3>
+                    <div id="detailed-feedback"></div>
+                </div>
+
+                <div class="text-center p-3 bg-[#FFD93D]/10 border-2 border-[#FFD93D]/40 rounded-xl">
+                    <p class="text-xs font-black text-[#FFD93D] mb-0.5">📸 CAPTURA ESTE CUADRANTE</p>
+                    <p class="text-[10px] text-gray-300">Súbelo a <strong>Teams</strong> como evidencia.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+// ==================== DATOS ====================
+const ALL_ITEMS = [
+    { id: 'p1', tipo: 'audicion', categoria: 'problemas', texto: 'Tinnitus o acúfenos (zumbido molesto en oídos sin fuente externa)' },
+    { id: 'p2', tipo: 'audicion', categoria: 'problemas', texto: 'Sensación de sonido amortiguado o voces apagadas' },
+    { id: 'p3', tipo: 'audicion', categoria: 'problemas', texto: 'Pérdida auditiva progresiva por sobrecarga de sonido' },
+    { id: 'p4', tipo: 'audicion', categoria: 'problemas', texto: 'Infección purulenta con dolor y secreción de pus' },
+    { id: 'p5', tipo: 'vision', categoria: 'problemas', texto: 'Fatiga ocular digital por uso prolongado de dispositivos' },
+    { id: 'p6', tipo: 'vision', categoria: 'problemas', texto: 'Ardor, irritación y sequedad ocular por falta de parpadeo' },
+    { id: 'p7', tipo: 'vision', categoria: 'problemas', texto: 'Visión borrosa momentánea y cefaleas (dolores de cabeza)' },
+    { id: 'p8', tipo: 'vision', categoria: 'problemas', texto: 'Tensión cervical y síndrome del cuello de texto' },
+
+    { id: 'c1', tipo: 'audicion', categoria: 'causas', texto: 'Presión sonora mayor a 120 dB que destruye las células ciliadas de la cóclea' },
+    { id: 'c2', tipo: 'audicion', categoria: 'causas', texto: 'Uso de audífonos a volumen alto que inflama el tejido de la membrana basilar' },
+    { id: 'c3', tipo: 'audicion', categoria: 'causas', texto: 'Estrés oxidativo celular con especies reactivas de oxígeno que roban electrones' },
+    { id: 'c4', tipo: 'audicion', categoria: 'causas', texto: 'Uso de remedios caseros (aceite templado) que empeoran infecciones' },
+    { id: 'c5', tipo: 'audicion', categoria: 'causas', texto: 'Uso de cotonetes, lápices o palitos que perforan el tímpano' },
+    { id: 'c6', tipo: 'vision', categoria: 'causas', texto: 'Reducción del parpadeo al fijar la vista en pantallas deshidratando la córnea' },
+    { id: 'c7', tipo: 'vision', categoria: 'causas', texto: 'Distancia de lectura menor a 30 cm que sobrecarga los músculos de enfoque' },
+    { id: 'c8', tipo: 'vision', categoria: 'causas', texto: 'Uso de pantallas a oscuras antes de dormir que altera el ritmo del sueño' },
+
+    { id: 'r1', tipo: 'audicion', categoria: 'recomendaciones', texto: 'Aplicar la Regla 60/60 (máximo 60% de volumen por 60 minutos)' },
+    { id: 'r2', tipo: 'audicion', categoria: 'recomendaciones', texto: 'Regla 80%/90 min si se usan audífonos aislantes de ruido' },
+    { id: 'r3', tipo: 'audicion', categoria: 'recomendaciones', texto: 'Uso de tapones de oídos en conciertos o eventos ruidosos' },
+    { id: 'r4', tipo: 'audicion', categoria: 'recomendaciones', texto: 'Mantener oídos limpios y secos, usando solo medicamentos recetados' },
+    { id: 'r5', tipo: 'audicion', categoria: 'recomendaciones', texto: 'Agendar revisiones y chequeos audiológicos anuales' },
+    { id: 'r6', tipo: 'vision', categoria: 'recomendaciones', texto: 'Aplicar la Regla 20-20-20 (pausa cada 20 min mirando a 6 m por 20 s)' },
+    { id: 'r7', tipo: 'vision', categoria: 'recomendaciones', texto: 'Mantener pantallas a una distancia mínima de 30 a 40 cm' },
+    { id: 'r8', tipo: 'vision', categoria: 'recomendaciones', texto: 'Asegurar iluminación ambiental adecuada sin trabajar a oscuras' }
+];
+
+const COMMITMENTS = [
+    { id: 'cm1', texto: 'Ajustaré mis audífonos bajo la regla 60/60 (máximo 60% de volumen por 60 min).' },
+    { id: 'cm2', texto: 'No introduciré jamás cotonetes, palitos ni remedios caseros en mis oídos.' },
+    { id: 'cm3', texto: 'Aplicaré la regla 20-20-20 descansando la vista cada 20 minutos frente a pantallas.' },
+    { id: 'cm4', texto: 'Desconectaré mis dispositivos 30 minutos antes de dormir.' },
+    { id: 'cm5', texto: 'Utilizaré tapones protectores en conciertos y asistiré a chequeos preventivos.' },
+    { id: 'cm6', texto: 'Mantendré el celular a una distancia mínima de 30 a 40 cm de mi rostro.' }
+];
+
+const QUADRANTS = [
+    { key: 'problemas',      num: 1, color: 'var(--q1)', icon: '⚠️', title: 'Problemas experimentados en Visión y Audición', shortTitle: 'Problemas', need: 6, categories: 'problemas' },
+    { key: 'causas',         num: 2, color: 'var(--q2)', icon: '🔍', title: 'Causas Posibles y Mecanismos Biológicos', shortTitle: 'Causas', need: 6, categories: 'causas' },
+    { key: 'recomendaciones',num: 3, color: 'var(--q3)', icon: '💡', title: 'Recomendaciones de Cuidado', shortTitle: 'Recomendaciones', need: 6, categories: 'recomendaciones' },
+    { key: 'compromisos',    num: 4, color: 'var(--q4)', icon: '🤝', title: 'Mis 5 Compromisos de Autocuidado', shortTitle: 'Compromisos', need: 5, categories: 'compromisos' }
+];
+
+// ==================== ESTADO ====================
+const state = {
+    studentName: '',
+    group: '',
+    currentStep: 0,
+    currentQuadrant: 0,
+    startTime: null,
+    endTime: null,
+    timerInterval: null,
+    selections: {
+        problemas: [],
+        causas: [],
+        recomendaciones: [],
+        compromisos: []
+    },
+    validated: false,
+    results: null
+};
+
+// ==================== UTILIDADES ====================
+function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.toggle('error', isError);
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function formatTime(sec) {
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function updateClock() {
+    if (!state.startTime) return;
+    const diff = Math.floor((Date.now() - state.startTime) / 1000);
+    const el = document.getElementById('hud-time');
+    if (el) el.innerText = formatTime(diff);
+}
+
+function checkLogin() {
+    const n = document.getElementById('in-name').value.trim();
+    const g = document.getElementById('in-group').value.trim();
+    document.getElementById('btn-start').disabled = !(n.length > 3 && g.length > 1);
+}
+
+function getItemById(id) {
+    return ALL_ITEMS.find(i => i.id === id) || COMMITMENTS.find(c => c.id === id);
+}
+
+function getAllAssignedItemIds() {
+    return [
+        ...state.selections.problemas,
+        ...state.selections.causas,
+        ...state.selections.recomendaciones
+    ];
+}
+
+function getAvailableItems() {
+    const assigned = getAllAssignedItemIds();
+    return ALL_ITEMS.filter(i => !assigned.includes(i.id));
+}
+
+// ==================== NAVEGACIÓN ====================
+function goToStep(step) {
+    state.currentStep = step;
+    document.querySelectorAll('section').forEach(el => el.classList.add('hidden-step'));
+    document.getElementById('step-' + step).classList.remove('hidden-step');
+    window.scrollTo(0, 0);
+
+    const hud = document.getElementById('hud');
+    const home = document.getElementById('btnHome');
+    const capture = document.getElementById('btnCapture');
+
+    if (step === 'quadrant') {
+        hud.classList.remove('hidden-step');
+    } else {
+        hud.classList.add('hidden-step');
+    }
+
+    if (step === 3) {
+        home.classList.remove('hidden-step');
+        capture.classList.remove('hidden-step');
+    } else {
+        home.classList.add('hidden-step');
+        capture.classList.add('hidden-step');
+    }
+}
+
+// ==================== INICIO ====================
+function startLab() {
+    state.studentName = document.getElementById('in-name').value.trim();
+    state.group = document.getElementById('in-group').value.trim();
+    state.startTime = Date.now();
+    state.currentQuadrant = 0;
+    state.selections = { problemas: [], causas: [], recomendaciones: [], compromisos: [] };
+    state.validated = false;
+
+    document.getElementById('hud-name').innerText = state.studentName.split(' ')[0].substring(0, 12);
+
+    if (!state.timerInterval) {
+        state.timerInterval = setInterval(updateClock, 1000);
+    }
+
+    renderQuadrant();
+    goToStep('quadrant');
+}
+
+// ==================== RENDER CUADRANTE ====================
+function renderQuadrant() {
+    const q = QUADRANTS[state.currentQuadrant];
+    const container = document.getElementById('quadrant-content');
+
+    document.getElementById('hud-q').innerText = `${state.currentQuadrant + 1}/4`;
+
+    renderStepper();
+
+    let html = '';
+
+    html += `<div class="quadrant-active q${state.currentQuadrant}">
+        <div class="quadrant-title-main">
+            <div class="quadrant-num-big">${q.num}</div>
+            <div class="quadrant-name">${q.icon} ${q.title}</div>
+        </div>
+        <div class="quadrant-instruct">`;
+
+    if (state.currentQuadrant < 3) {
+        html += `Toca las tarjetas del banco que correspondan a este cuadrante. Debes seleccionar <strong>exactamente ${q.need}</strong>.`;
+    } else {
+        html += `Elige <strong>exactamente ${q.need}</strong> compromisos personales de autocuidado. <em>(Obligatorio, pero no suma calificación)</em>`;
+    }
+    html += `</div>`;
+
+    if (state.currentQuadrant < 3) {
+        html += renderSelectedZone(q);
+        html += renderBankZone();
+    } else {
+        html += renderCommitmentsZone();
+    }
+
+    html += `</div>`;
+
+    const isComplete = state.selections[q.key].length === q.need;
+    const isFirst = state.currentQuadrant === 0;
+    const isLast = state.currentQuadrant === 3;
+
+    html += `<div class="nav-bar no-print">
+        <button class="nav-btn prev" onclick="prevQuadrant()" ${isFirst ? 'disabled' : ''}>← ANTERIOR</button>`;
+
+    if (isLast) {
+        html += `<button class="nav-btn finish" onclick="validateAll()" ${!isComplete ? 'disabled' : ''}>
+            ${isComplete ? '✅ VALIDAR Y FINALIZAR' : `FALTAN ${q.need - state.selections[q.key].length}`}
+        </button>`;
+    } else {
+        html += `<button class="nav-btn next" onclick="nextQuadrant()" ${!isComplete ? 'disabled' : ''}>
+            ${isComplete ? 'SIGUIENTE →' : `FALTAN ${q.need - state.selections[q.key].length}`}
+        </button>`;
+    }
+
+    html += `</div>`;
+
+    container.innerHTML = html;
+}
+
+function renderStepper() {
+    const stepper = document.getElementById('stepper');
+    stepper.innerHTML = QUADRANTS.map((q, i) => {
+        let cls = 'stepper-item';
+        if (i === state.currentQuadrant) cls += ' active';
+        else if (state.selections[q.key].length === q.need) cls += ' done';
+        return `<div class="${cls}" onclick="goToQuadrant(${i})">
+            <span class="num">${q.num}</span>
+            ${q.shortTitle}
+        </div>`;
+    }).join('');
+}
+
+function renderSelectedZone(q) {
+    const selected = state.selections[q.key];
+    const isComplete = selected.length === q.need;
+
+    let html = `<div class="selected-zone">
+        <div class="selected-zone-header">
+            <span>📌 SELECCIONADAS</span>
+            <span class="selected-zone-counter ${isComplete ? 'complete' : ''}">${selected.length}/${q.need}</span>
+        </div>
+        <div class="selected-chips">`;
+
+    if (selected.length === 0) {
+        html += `<div class="selected-empty">👆 Selecciona ${q.need} tarjetas del banco</div>`;
+    } else {
+        selected.forEach(id => {
+            const item = getItemById(id);
+            if (!item) return;
+            html += `<div class="selected-chip">
+                <span class="chip-text">${item.texto}</span>
+                <button class="chip-remove" onclick="removeSelection('${id}')" title="Quitar">×</button>
+            </div>`;
+        });
+    }
+
+    html += `</div></div>`;
+    return html;
+}
+
+function renderBankZone() {
+    const q = QUADRANTS[state.currentQuadrant];
+    const selected = state.selections[q.key];
+    const isFull = selected.length >= q.need;
+    const available = getAvailableItems();
+
+    let html = `<div class="bank-container">
+        <div class="bank-header-small">
+            <span>📚 BANCO DISPONIBLE (${available.length})</span>
+            ${isFull ? '<span style="color: var(--protect); font-size: 10px;">✓ CUADRANTE COMPLETO</span>' : ''}
+        </div>
+        <div class="bank-grid-mobile">`;
+
+    if (available.length === 0) {
+        html += `<div class="bank-empty">No hay tarjetas disponibles</div>`;
+    } else {
+        available.forEach(item => {
+            html += `<div class="bank-card-mobile" onclick="addSelection('${item.id}')">
+                <span class="icon-badge ${item.tipo}">${item.tipo === 'vision' ? '👁️' : '🎧'}</span>
+                <span>${item.texto}</span>
+            </div>`;
+        });
+    }
+
+    html += `</div></div>`;
+    return html;
+}
+
+function renderCommitmentsZone() {
+    const selected = state.selections.compromisos;
+    const need = 5;
+    const isFull = selected.length >= need;
+
+    let html = `<div class="selected-zone">
+        <div class="selected-zone-header">
+            <span>📌 COMPROMISOS ELEGIDOS</span>
+            <span class="selected-zone-counter ${isFull ? 'complete' : ''}">${selected.length}/${need}</span>
+        </div>`;
+
+    if (selected.length === 0) {
+        html += `<div class="selected-empty">👆 Elige ${need} compromisos de la lista</div>`;
+    } else {
+        html += `<div class="selected-chips">`;
+        selected.forEach(id => {
+            const c = COMMITMENTS.find(x => x.id === id);
+            if (!c) return;
+            html += `<div class="selected-chip" style="border-left-color: var(--q4);">
+                <span class="chip-text">${c.texto}</span>
+                <button class="chip-remove" onclick="removeCommitment('${id}')" title="Quitar">×</button>
+            </div>`;
+        });
+        html += `</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div class="bank-container">
+        <div class="bank-header-small">
+            <span>🤝 COMPROMISOS DISPONIBLES (${COMMITMENTS.length})</span>
+        </div>
+        <div class="commitment-list">`;
+
+    COMMITMENTS.forEach(c => {
+        const isSelected = selected.includes(c.id);
+        const isDisabled = isFull && !isSelected;
+        html += `<div class="commitment-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+                      onclick="toggleCommitment('${c.id}')">
+            <div class="commitment-check">${isSelected ? '✓' : ''}</div>
+            <div>${c.texto}</div>
+        </div>`;
+    });
+
+    html += `</div></div>`;
+    return html;
+}
+
+// ==================== INTERACCIÓN ====================
+function addSelection(itemId) {
+    const q = QUADRANTS[state.currentQuadrant];
+    if (state.currentQuadrant >= 3) return;
+    if (state.selections[q.key].length >= q.need) {
+        showToast(`Ya tienes ${q.need} seleccionadas. Quita una primero.`, true);
+        return;
+    }
+    state.selections[q.key].push(itemId);
+    renderQuadrant();
+}
+
+function removeSelection(itemId) {
+    const q = QUADRANTS[state.currentQuadrant];
+    if (state.currentQuadrant >= 3) return;
+    state.selections[q.key] = state.selections[q.key].filter(id => id !== itemId);
+    renderQuadrant();
+}
+
+function toggleCommitment(cId) {
+    if (state.selections.compromisos.includes(cId)) {
+        state.selections.compromisos = state.selections.compromisos.filter(id => id !== cId);
+    } else {
+        if (state.selections.compromisos.length >= 5) {
+            showToast('Solo puedes elegir 5 compromisos', true);
+            return;
+        }
+        state.selections.compromisos.push(cId);
+    }
+    renderQuadrant();
+}
+
+function removeCommitment(cId) {
+    state.selections.compromisos = state.selections.compromisos.filter(id => id !== cId);
+    renderQuadrant();
+}
+
+function nextQuadrant() {
+    if (state.currentQuadrant < 3) {
+        state.currentQuadrant++;
+        renderQuadrant();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function prevQuadrant() {
+    if (state.currentQuadrant > 0) {
+        state.currentQuadrant--;
+        renderQuadrant();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function goToQuadrant(index) {
+    if (index >= 0 && index < 4) {
+        state.currentQuadrant = index;
+        renderQuadrant();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// ==================== VALIDACIÓN ====================
+function validateAll() {
+    for (const q of QUADRANTS) {
+        if (state.selections[q.key].length !== q.need) {
+            showToast(`Faltan elementos en Cuadrante ${q.num}`, true);
+            state.currentQuadrant = QUADRANTS.indexOf(q);
+            renderQuadrant();
+            return;
+        }
+    }
+
+    goToStep('loading');
+
+    setTimeout(() => document.getElementById('calc-1').innerHTML = '[*] Verificando clasificaciones... <span class="text-[#06D6A0]">✔ OK</span>', 600);
+    setTimeout(() => document.getElementById('calc-2').innerHTML = '[*] Contando aciertos... <span class="text-[#06D6A0]">✔ OK</span>', 1200);
+    setTimeout(() => document.getElementById('calc-3').innerHTML = '[*] Generando cuadrante final... <span class="text-[#06D6A0]">✔ OK</span>', 1800);
+
+    setTimeout(() => {
+        runEvaluation();
+        goToStep(3);
+    }, 2400);
+}
+
+// ==================== EVALUACIÓN (SOLO 3 PRIMEROS CUADRANTES) ====================
+function runEvaluation() {
+    state.endTime = Date.now();
+    clearInterval(state.timerInterval);
+    const seconds = Math.floor((state.endTime - state.startTime) / 1000);
+
+    const results = {
+        itemResults: {},
+        byQuadrant: {
+            problemas: { correct: 0, total: 6, items: [] },
+            causas: { correct: 0, total: 6, items: [] },
+            recomendaciones: { correct: 0, total: 6, items: [] }
+        },
+        commits: [],
+        timeSeconds: seconds
+    };
+
+    let correctCount = 0;
+
+    ['problemas', 'causas', 'recomendaciones'].forEach(qKey => {
+        state.selections[qKey].forEach(itemId => {
+            const item = getItemById(itemId);
+            if (!item) return;
+            const isCorrect = item.categoria === qKey;
+            results.itemResults[itemId] = {
+                correct: isCorrect,
+                placedIn: qKey,
+                correctCategory: item.categoria,
+                texto: item.texto,
+                tipo: item.tipo
+            };
+            results.byQuadrant[qKey].items.push({
+                id: itemId,
+                texto: item.texto,
+                correct: isCorrect,
+                correctCategory: item.categoria,
+                tipo: item.tipo
+            });
+            if (isCorrect) {
+                results.byQuadrant[qKey].correct++;
+                correctCount++;
+            }
+        });
+    });
+
+    // Compromisos (solo para mostrar, NO suman)
+    state.selections.compromisos.forEach(cId => {
+        const c = COMMITMENTS.find(x => x.id === cId);
+        if (c) results.commits.push({ id: c.id, texto: c.texto });
+    });
+
+    // ===== CALIFICACIÓN: SOLO 18 items → escala 0-10 =====
+    const finalScore = Math.round((correctCount / 18) * 10);
+
+    results.correctCount = correctCount;
+    results.totalItems = 18;
+    results.finalScore = finalScore;
+
+    state.results = results;
+    state.validated = true;
+
+    renderCertificate(results);
+}
+
+// ==================== CERTIFICADO ====================
+function renderCertificate(results) {
+    document.getElementById('final-name').innerText = state.studentName;
+    document.getElementById('final-group').innerText = state.group;
+    document.getElementById('final-time').innerText = formatTime(results.timeSeconds);
+    document.getElementById('final-grade').innerText = results.finalScore;
+
+    renderFinalQuadrants(results);
+    renderFeedback(results);
+}
+
+function renderFinalQuadrants(results) {
+    const container = document.getElementById('final-quadrants');
+    let html = '';
+
+    for (let i = 0; i < 3; i++) {
+        const q = QUADRANTS[i];
+        const qData = results.byQuadrant[q.key];
+        html += `<div class="final-quadrant q${i + 1}">
+            <div class="fq-header">
+                <span class="num">${q.num}</span>
+                <span class="title-text">${q.icon} ${q.shortTitle}</span>
+                <span class="score-badge">${qData.correct}/${qData.total}</span>
+            </div>
+            <div class="fq-body">`;
+
+        qData.items.forEach(item => {
+            const icon = item.correct ? '✅' : '❌';
+            const note = !item.correct ? `<span class="note">Era: ${getQuadrantName(item.correctCategory)}</span>` : '';
+            html += `<div class="fq-item ${item.correct ? 'ok' : 'bad'}">
+                <span class="icon">${icon}</span>
+                <div class="txt">${item.texto}${note}</div>
+            </div>`;
+        });
+
+        html += `</div></div>`;
+    }
+
+    // Q4 - compromisos (sin score)
+    html += `<div class="final-quadrant q4">
+        <div class="fq-header">
+            <span class="num">4</span>
+            <span class="title-text">🤝 Compromisos</span>
+            <span class="score-badge">✓ ${results.commits.length}/5</span>
+        </div>
+        <div class="fq-body">`;
+
+    results.commits.forEach(c => {
+        html += `<div class="fq-item ok">
+            <span class="icon">✓</span>
+            <div class="txt">${c.texto}</div>
+        </div>`;
+    });
+
+    html += `</div></div>`;
+
+    container.innerHTML = html;
+}
+
+function getQuadrantName(cat) {
+    const q = QUADRANTS.find(x => x.key === cat);
+    return q ? q.shortTitle : cat;
+}
+
+function renderFeedback(results) {
+    const container = document.getElementById('detailed-feedback');
+    const accuracy = Math.round((results.correctCount / results.totalItems) * 100);
+    const scoreClass = results.finalScore >= 8 ? 'ok' : results.finalScore >= 6 ? 'warn' : 'bad';
+
+    let html = '';
+
+    html += `<div class="criteria-row ${scoreClass}">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:#fff; font-size:12px;">📊 CALIFICACIÓN FINAL</strong>
+            <span style="font-family:'JetBrains Mono'; color:#FFD93D; font-weight:700; font-size:12px;">${results.finalScore}/10</span>
+        </div>
+        <p style="font-size:11px; color:#c8d6e5; line-height:1.5;">`;
+    if (results.finalScore >= 9) html += `✅ <strong>¡Excelente!</strong> Dominas los riesgos, causas y recomendaciones para la salud visual y auditiva.`;
+    else if (results.finalScore >= 7) html += `⚠️ <strong>Buen trabajo.</strong> Repasa los conceptos donde tuviste errores.`;
+    else if (results.finalScore >= 5) html += `⚠️ <strong>Puedes mejorar.</strong> Revisa la diferencia entre problemas, causas y recomendaciones.`;
+    else html += `❌ <strong>Refuerza el estudio.</strong> Vuelve a repasar los apuntes y practica clasificando.`;
+    html += `</p></div>`;
+
+    const accClass = accuracy >= 70 ? 'ok' : accuracy >= 50 ? 'warn' : 'bad';
+    html += `<div class="criteria-row ${accClass}">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:#fff; font-size:12px;">🎯 PRECISIÓN EN CLASIFICACIÓN</strong>
+            <span style="font-family:'JetBrains Mono'; color:${accuracy >= 70 ? '#06D6A0' : accuracy >= 50 ? '#FFD93D' : '#FF3B5C'}; font-weight:700; font-size:12px;">${accuracy}%</span>
+        </div>
+        <p style="font-size:11px; color:#c8d6e5; line-height:1.5;">
+            Clasificaste correctamente <strong>${results.correctCount} de ${results.totalItems}</strong> tarjetas en los 3 primeros cuadrantes.
+        </p>
+    </div>`;
+
+    html += `<div class="criteria-row">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:#fff; font-size:12px;">🤝 COMPROMISOS DE AUTOCUIDADO</strong>
+            <span style="font-family:'JetBrains Mono'; color:#B14AED; font-weight:700; font-size:12px;">${results.commits.length}/5</span>
+        </div>
+        <p style="font-size:11px; color:#c8d6e5; line-height:1.5;">
+            Elegiste <strong>${results.commits.length} compromisos personales</strong>. No suman calificación, pero demuestran tu compromiso con el autocuidado. ¡Cúmplelos!
+        </p>
+    </div>`;
+
+    const mins = Math.floor(results.timeSeconds / 60);
+    const secs = results.timeSeconds % 60;
+    html += `<div class="criteria-row">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+            <strong style="color:#fff; font-size:12px;">⏱️ TIEMPO</strong>
+            <span style="font-family:'JetBrains Mono'; color:#00D9FF; font-weight:700; font-size:12px;">${mins}m ${secs}s</span>
+        </div>
+        <p style="font-size:11px; color:#c8d6e5; line-height:1.5;">ℹ️ El tiempo es <strong>solo informativo</strong> y no afecta tu calificación.</p>
+    </div>`;
+
+    container.innerHTML = html;
+}
+
+// ==================== CAPTURA ====================
+function takeScreenshot() {
+    const btnTop = document.getElementById('screenshotBtn');
+    const btnFloat = document.getElementById('btnCapture');
+    const originalTop = btnTop ? btnTop.innerHTML : '';
+    const originalFloat = btnFloat ? btnFloat.innerHTML : '';
+
+    if (btnTop) { btnTop.innerHTML = '⏳ CAPTURANDO...'; btnTop.disabled = true; }
+    if (btnFloat) { btnFloat.innerHTML = '⏳'; btnFloat.disabled = true; }
+
+    const area = document.getElementById('capture-area');
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'visible';
+
+    setTimeout(() => {
+        html2canvas(area, {
+            backgroundColor: '#0f0c29',
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            allowTaint: true,
+            scrollX: 0,
+            scrollY: -window.scrollY,
+            width: area.scrollWidth,
+            height: area.scrollHeight,
+            windowWidth: document.documentElement.scrollWidth,
+            windowHeight: area.scrollHeight + 200,
+            onclone: function(clonedDoc) {
+                const clonedArea = clonedDoc.getElementById('capture-area');
+                if (clonedArea) {
+                    clonedArea.style.background = 'linear-gradient(135deg, #0f0c29, #302b63)';
+                    clonedArea.style.color = '#F8F9FA';
+                }
+                clonedDoc.querySelectorAll('.text-gray-300').forEach(el => el.style.color = '#d1d5db');
+                clonedDoc.querySelectorAll('.text-white').forEach(el => el.style.color = '#ffffff');
+            }
+        }).then(canvas => {
+            const name = state.studentName.replace(/\s+/g, '_') || 'Estudiante';
+            const link = document.createElement('a');
+            link.download = `OjosOidos100_${name}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            if (btnTop) { btnTop.innerHTML = originalTop; btnTop.disabled = false; }
+            if (btnFloat) { btnFloat.innerHTML = originalFloat; btnFloat.disabled = false; }
+            document.body.style.overflow = originalOverflow;
+            showToast('✔ ¡Cuadrante descargado!');
+        }).catch(err => {
+            console.error(err);
+            if (btnTop) { btnTop.innerHTML = originalTop; btnTop.disabled = false; }
+            if (btnFloat) { btnFloat.innerHTML = originalFloat; btnFloat.disabled = false; }
+            document.body.style.overflow = originalOverflow;
+            showToast('✗ Error al capturar', true);
+        });
+    }, 200);
+}
+
+// ==================== INICIALIZACIÓN ====================
+window.addEventListener('load', () => {
+    document.getElementById('in-name').focus();
+});
+</script>
+</body>
+</html>
